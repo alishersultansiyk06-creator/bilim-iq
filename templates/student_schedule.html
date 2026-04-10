@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <title>BILIM.IQ | Сабақ кестесі</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f7fa; font-family: 'Inter', sans-serif; color: #334155; }
+
+        /* Негізгі контейнер */
+        .schedule-container {
+            display: grid;
+            grid-template-columns: 1fr 350px; /* Тор және оң жақ панель */
+            gap: 20px;
+            padding: 20px;
+            height: 90vh;
+        }
+
+        /* Сол жақ: Апталық кесте */
+        .weekly-grid {
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            overflow-y: auto;
+        }
+
+        .grid-header {
+            display: grid;
+            grid-template-columns: 80px repeat(7, 1fr);
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 15px;
+            text-align: center;
+        }
+
+        .day-label { font-weight: 700; font-size: 0.9rem; color: #64748b; }
+        .day-label.active { color: #6366f1; }
+        .date-number { display: block; font-size: 1.4rem; margin-top: 5px; }
+
+        .time-row {
+            display: grid;
+            grid-template-columns: 80px repeat(7, 1fr);
+            height: 100px;
+            border-bottom: 1px dashed #f1f5f9;
+            position: relative;
+        }
+
+        .time-label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            padding-top: 10px;
+            text-align: right;
+            padding-right: 15px;
+        }
+
+        /* Сабақ карталары (Кестедегі) */
+        .lesson-card {
+            background: rgba(99, 102, 241, 0.1);
+            border-left: 4px solid #6366f1;
+            border-radius: 8px;
+            margin: 5px;
+            padding: 10px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .lesson-card:hover { transform: scale(1.02); z-index: 10; background: rgba(99, 102, 241, 0.15); }
+        .lesson-card.yellow { background: rgba(245, 158, 11, 0.1); border-color: #f59e0b; }
+        .lesson-card.green { background: rgba(16, 185, 129, 0.1); border-color: #10b981; }
+
+        /* Оң жақ: Календарь және Күн тәртібі */
+        .side-panel {
+            background: white;
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        .mini-calendar {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .agenda-item {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #f1f5f9;
+        }
+
+        .badge-type {
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: #ecfdf5;
+            color: #10b981;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="schedule-container">
+
+    <div class="weekly-grid">
+        <div class="grid-header">
+            <div></div> <div class="day-label">Дс<span class="date-number">23</span></div>
+            <div class="day-label active">Сс<span class="date-number text-primary">24</span></div>
+            <div class="day-label">Ср<span class="date-number">25</span></div>
+            <div class="day-label">Бс<span class="date-number">26</span></div>
+            <div class="day-label">Жм<span class="date-number">27</span></div>
+            <div class="day-label text-danger">Сн<span class="date-number">28</span></div>
+            <div class="day-label text-danger">Жк<span class="date-number">1</span></div>
+        </div>
+
+        <div class="time-row">
+            <div class="time-label">09:00</div>
+            <div></div> <div></div> <div></div> <div class="lesson-card">
+                <b>Машиналық оқыту</b><br>
+                <small>Корп №2, 205-2</small>
+            </div>
+            <div></div>
+        </div>
+
+        <div class="time-row">
+            <div class="time-label">10:00</div>
+            <div class="lesson-card green">
+                <b>Серверлік...</b><br>
+                <small>БГА</small>
+            </div>
+            <div></div>
+            <div></div>
+            <div class="lesson-card yellow">
+                <b>Басқару...</b><br>
+                <small>205-2</small>
+            </div>
+            <div></div>
+            <div class="lesson-card">
+                <b>Мұнай-газ...</b><br>
+                <small>Желіде</small>
+            </div>
+        </div>
+
+        <div class="time-row">
+            <div class="time-label">12:00</div>
+            <div></div>
+            <div class="lesson-card green">
+                <b>Жасанды интеллект...</b><br>
+                <small>Корп №1, БЭА</small>
+            </div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
+
+    <div class="side-panel">
+        <h5 class="fw-bold mb-4">Бүгін 24 Февраль</h5>
+
+        <div class="agenda-item">
+            <span class="badge-type">ДӘРІС</span>
+            <h6 class="fw-bold">Жасанды интеллект және мәліметтерді талдау негіздері</h6>
+            <div class="text-muted small mt-2">
+                <i class="bi bi-clock me-1"></i> 12:00 - 12:50
+            </div>
+        </div>
+
+        <div class="agenda-item">
+            <span class="badge-type" style="background: #eff6ff; color: #3b82f6;">ПРАКТИКА</span>
+            <h6 class="fw-bold">Машиналық оқыту</h6>
+            <div class="text-muted small mt-2">
+                <i class="bi bi-clock me-1"></i> 13:00 - 13:50
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <img src="https://img.freepik.com/free-vector/calendar-concept-illustration_114360-3914.jpg" class="img-fluid rounded-4 opacity-50">
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BILIM.IQ | Мұғалімнің жұмыс үстелі</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+
+    <style>
+        :root {
+            --primary: #5d5fef; --bg: #f8f9fd; --card: #ffffff;
+            --text-main: #1a1d23; --text-sub: #787f8c; --border: #e2e8f0;
+            --success: #22c55e;
+        }
+        [data-theme="dark"] {
+            --bg: #0f172a; --card: #1e293b; --text-main: #f1f5f9; --border: #334155;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; transition: 0.3s; }
+        body { background-color: var(--bg); color: var(--text-main); line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+        /* HEADER */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--border); }
+        .logo { font-weight: 800; font-size: 1.5rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .theme-toggle { cursor: pointer; font-size: 1.4rem; color: var(--text-sub); }
+
+        /* STATS */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin: 30px 0; }
+        .stat-card { background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+        .stat-card h3 { font-size: 1.8rem; color: var(--primary); }
+
+        /* TABS */
+        .menu-tabs { display: flex; gap: 10px; margin-bottom: 30px; }
+        .tab-btn { padding: 12px 20px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); color: var(--text-main); cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* CONTENT */
+        .page { display: none; animation: fadeIn 0.4s ease; }
+        .active-page { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .content-card { background: var(--card); border-radius: 24px; padding: 30px; border: 1px solid var(--border); margin-bottom: 25px; }
+
+        /* UPLOAD & FORM */
+        .task-form { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 15px; align-items: center; }
+        input { padding: 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text-main); width: 100%; }
+        .btn-main { background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 10px; font-weight: 600; cursor: pointer; }
+        .btn-main:disabled { background: #a5a6f6; cursor: not-allowed; }
+
+        /* PROGRESS BAR */
+        .progress-container { width: 100%; background: #e2e8f0; border-radius: 10px; margin-top: 15px; display: none; overflow: hidden; }
+        .progress-bar { width: 0%; height: 8px; background: var(--primary); transition: 0.3s; }
+        .status-text { font-size: 0.8rem; color: var(--primary); margin-top: 5px; font-weight: 700; }
+
+        /* TABLE */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { text-align: left; padding: 15px; color: var(--text-sub); border-bottom: 2px solid var(--border); }
+        td { padding: 15px; border-bottom: 1px solid var(--border); }
+        .file-badge { background: #e0e7ff; color: #4338ca; padding: 5px 10px; border-radius: 8px; text-decoration: none; font-size: 0.8rem; font-weight: 600; }
+    </style>
+</head>
+<body data-theme="light">
+
+    <div class="container">
+        <nav>
+            <a href="#" class="logo" onclick="showPage('homePage')"><i class="bi bi-grid-1x2-fill"></i> BILIM.IQ</a>
+            <div style="display:flex; gap:20px; align-items:center;">
+                <i class="bi bi-moon-stars-fill theme-toggle" onclick="toggleTheme()"></i>
+                <div style="text-align: right;">
+                    <b style="display: block;">Биғалиева Венера</b>
+                    <small style="color: var(--success);">Мұғалім • Online</small>
+                </div>
+            </div>
+        </nav>
+
+        <div class="stats-grid">
+            <div class="stat-card"><h3>28</h3><p>Студенттер</p></div>
+            <div class="stat-card"><h3 id="taskCountStat">0</h3><p>Тапсырмалар</p></div>
+            <div class="stat-card"><h3>84%</h3><p>Үлгерім</p></div>
+            <div class="stat-card"><h3>100%</h3><p>Жүйе күйі</p></div>
+        </div>
+
+        <div class="menu-tabs">
+            <button class="tab-btn active" onclick="switchTab(this, 'homePage')"><i class="bi bi-house"></i> Басты</button>
+            <button class="tab-btn" onclick="switchTab(this, 'tasksPage')"><i class="bi bi-plus-circle"></i> Тапсырмалар</button>
+            <button class="tab-btn" onclick="switchTab(this, 'journalPage')"><i class="bi bi-journal-text"></i> Журнал</button>
+        </div>
+
+        <div id="homePage" class="page active-page">
+            <div class="content-card" style="background: linear-gradient(135deg, var(--primary), #3d4451); color: white; border: none;">
+                <h2>Қайырлы күн, ұстаз!</h2>
+                <p>Бүгінге жоспарланған жұмыстарды осы жерден бақылаңыз.</p>
+            </div>
+        </div>
+
+        <div id="tasksPage" class="page">
+            <div class="content-card">
+                <h3>Жаңа тапсырма қосу</h3>
+                <div class="task-form">
+                    <input type="text" id="tName" placeholder="Тапсырма атауы">
+                    <input type="date" id="tDate">
+                    <input type="file" id="tFile">
+                    <button class="btn-main" id="uploadBtn" onclick="handleUpload()">Жариялау</button>
+                </div>
+                <div id="pContainer" class="progress-container">
+                    <div id="pBar" class="progress-bar"></div>
+                </div>
+                <div id="pStatus" class="status-text"></div>
+            </div>
+
+            <div class="content-card">
+                <h3>Жарияланған жұмыстар</h3>
+                <table>
+                    <thead><tr><th>Атауы</th><th>Мерзімі</th><th>Файл</th><th>Жою</th></tr></thead>
+                    <tbody id="taskTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="journalPage" class="page">
+            <div class="content-card">
+                <h3>Студенттер тізімі</h3>
+                <table>
+                    <thead><tr><th>Аты-жөні</th><th>Ағымдағы балл</th><th>Жаңа баға</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><b>Сұлтансиық Әлішер</b></td>
+                            <td id="liveGrade" style="font-weight: 800; color: var(--primary);">0</td>
+                            <td>
+                                <input type="number" id="gInput" style="width: 80px; margin-right: 10px;" placeholder="0">
+                                <button class="btn-main" onclick="updateGrade()">Сақтау</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><b>Сүлейменов Сырым</b></td>
+                            <td id="liveGrade" style="font-weight: 800; color: var(--primary);">0</td>
+                            <td>
+                                <input type="number" id="gInput" style="width: 80px; margin-right: 10px;" placeholder="0">
+                                <button class="btn-main" onclick="updateGrade()">Сақтау</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        // 1. FIREBASE CONFIGURATION
+        const firebaseConfig = {
+            databaseURL: "https://bilim-iq-default-rtdb.firebaseio.com/",
+            storageBucket: "bilim-iq-default-rtdb.appspot.com" // ОСЫ ЖЕРГЕ ӨЗ СІЛТЕМЕҢДІ ҚОЙ
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const storage = firebase.storage();
+
+        // 2. UI FUNCTIONS
+        function switchTab(btn, pageId) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+            btn.classList.add('active');
+            document.getElementById(pageId).classList.add('active-page');
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            body.dataset.theme = body.dataset.theme === 'light' ? 'dark' : 'light';
+        }
+
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+            document.getElementById(id).classList.add('active-page');
+        }
+
+        // 3. UPLOAD LOGIC (With Progress Bar)
+        async function handleUpload() {
+            const name = document.getElementById('tName').value;
+            const date = document.getElementById('tDate').value;
+            const file = document.getElementById('tFile').files[0];
+            const btn = document.getElementById('uploadBtn');
+            const pBar = document.getElementById('pBar');
+            const pStatus = document.getElementById('pStatus');
+            const pContainer = document.getElementById('pContainer');
+
+            if(!name || !date) return alert("Атауы мен күнін толтырыңыз!");
+
+            btn.disabled = true;
+            btn.innerText = "Күте тұрыңыз...";
+            pContainer.style.display = "block";
+
+            if(file) {
+                const storageRef = storage.ref('tasks/' + file.name);
+                const uploadTask = storageRef.put(file);
+
+                uploadTask.on('state_changed',
+                    (snap) => {
+                        const progress = (snap.bytesTransferred / snap.totalBytes) * 100;
+                        pBar.style.width = progress + "%";
+                        pStatus.innerText = "Файл жүктелуде: " + Math.round(progress) + "%";
+                    },
+                    (error) => { alert("Storage қатесі! Rules тексеріңіз."); resetUI(); },
+                    async () => {
+                        const url = await uploadTask.snapshot.ref.getDownloadURL();
+                        saveTask(name, date, url, file.name);
+                    }
+                );
+            } else {
+                saveTask(name, date, "", "");
+            }
+        }
+
+        function saveTask(name, date, url, fName) {
+            db.ref('tasks').push({ name, date, fileUrl: url, fileName: fName })
+            .then(() => {
+                alert("Тапсырма жарияланды!");
+                resetUI();
+            });
+        }
+
+        function resetUI() {
+            const btn = document.getElementById('uploadBtn');
+            btn.disabled = false;
+            btn.innerText = "Жариялау";
+            document.getElementById('pContainer').style.display = "none";
+            document.getElementById('tName').value = "";
+            document.getElementById('tFile').value = "";
+        }
+
+        // 4. REAL-TIME DATA (Tasks & Grades)
+        db.ref('tasks').on('value', (snap) => {
+            const tbody = document.getElementById('taskTableBody');
+            const stat = document.getElementById('taskCountStat');
+            tbody.innerHTML = "";
+            let count = 0;
+            snap.forEach(child => {
+                count++;
+                const task = child.val();
+                const fileLink = task.fileUrl ? `<a href="${task.fileUrl}" target="_blank" class="file-badge">Файл</a>` : "Жоқ";
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>${task.name}</b></td>
+                        <td>${task.date}</td>
+                        <td>${fileLink}</td>
+                        <td><i class="bi bi-trash" style="color:red; cursor:pointer;" onclick="db.ref('tasks/${child.key}').remove()"></i></td>
+                    </tr>`;
+            });
+            stat.innerText = count;
+        });
+
+        function updateGrade() {
+            const val = document.getElementById('gInput').value;
+            if(val) db.ref('grades/sultansiyk').set(val).then(() => alert("Баға сақталды!"));
+        }
+
+        db.ref('grades/sultansiyk').on('value', (snap) => {
+            document.getElementById('liveGrade').innerText = snap.val() || 0;
+        });
+
+    </script>
+</body>
+</html>

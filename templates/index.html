@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BILIM.IQ | Real-time Жүйе</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root { --primary: #5d5fef; --bg: #f8f9fd; --card: #ffffff; --shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg); padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .switcher { display: flex; gap: 10px; margin-bottom: 20px; background: #eef2ff; padding: 10px; border-radius: 15px; width: fit-content; }
+        .sw-btn { padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; }
+        .active { background: var(--primary); color: white; }
+        .card { background: var(--card); border-radius: 25px; padding: 30px; box-shadow: var(--shadow); margin-bottom: 20px; display: none; }
+        .show { display: block; }
+        input, button { padding: 12px; border-radius: 10px; border: 1px solid #ddd; outline: none; }
+        button { background: var(--primary); color: white; border: none; cursor: pointer; font-weight: 700; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { text-align: left; padding: 15px; border-bottom: 1px solid #eee; }
+        .grade-badge { background: #eef2ff; color: var(--primary); padding: 5px 15px; border-radius: 8px; font-weight: 800; font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="switcher">
+        <button id="tBtn" class="sw-btn active" onclick="setRole('teacher')">Мұғалім</button>
+        <button id="sBtn" class="sw-btn" onclick="setRole('student')">Студент</button>
+    </div>
+
+    <div id="teacherPanel" class="card show">
+        <h2 style="margin-bottom: 20px;"><i class="bi bi-person-workspace"></i> Мұғалім: Арман Оспанов</h2>
+
+        <div style="background: #fdf2f2; padding: 20px; border-radius: 15px;">
+            <h3>Серверлік инженерия: Баға қою</h3>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <input type="number" id="gradeInput" placeholder="Балл (0-100)">
+                <button onclick="updateGrade()">Сақтау</button>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <h3>Жаңа тапсырма жіберу</h3>
+            <div style="display: grid; gap: 10px; margin-top: 10px;">
+                <input type="text" id="taskName" placeholder="Тапсырма атауы">
+                <input type="date" id="taskDate">
+                <button onclick="updateTask()">Студенттерге жіберу</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="studentPanel" class="card">
+        <h2 style="margin-bottom: 20px;"><i class="bi bi-mortarboard"></i> Студент: Сұлтансиық Әлішер</h2>
+
+        <div style="text-align: center; padding: 20px; background: #f0fdf4; border-radius: 20px;">
+            <p>Серверлік инженерия бойынша бағаңыз:</p>
+            <div id="studentGrade" class="grade-badge" style="display: inline-block; margin-top: 10px; font-size: 2rem;">0</div>
+        </div>
+
+        <h3 style="margin-top: 30px;">Мұғалімнен тапсырмалар:</h3>
+        <table>
+            <thead><tr><th>Тапсырма</th><th>Мерзімі</th></tr></thead>
+            <tbody id="studentTasks"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // 1. РОЛЬДІ АУЫСТЫРУ
+    function setRole(role) {
+        document.getElementById('teacherPanel').classList.toggle('show', role === 'teacher');
+        document.getElementById('studentPanel').classList.toggle('show', role === 'student');
+        document.getElementById('tBtn').classList.toggle('active', role === 'teacher');
+        document.getElementById('sBtn').classList.toggle('active', role === 'student');
+        if(role === 'student') refreshData();
+    }
+
+    // 2. МҰҒАЛІМ: БАҒАНЫ ӨЗГЕРТУ
+    function updateGrade() {
+        const val = document.getElementById('gradeInput').value;
+        if(val !== "") {
+            localStorage.setItem('live_grade', val);
+            alert("Баға сақталды!");
+        }
+    }
+
+    // 3. МҰҒАЛІМ: ТАПСЫРМА ҚОСУ
+    function updateTask() {
+        const name = document.getElementById('taskName').value;
+        const date = document.getElementById('taskDate').value;
+        if(name && date) {
+            let tasks = JSON.parse(localStorage.getItem('live_tasks')) || [];
+            tasks.push({name, date});
+            localStorage.setItem('live_tasks', JSON.stringify(tasks));
+            alert("Тапсырма жіберілді!");
+            document.getElementById('taskName').value = "";
+        }
+    }
+
+    // 4. СТУДЕНТ: МӘЛІМЕТТІ ЖАҢАРТУ (REAL-TIME)
+    function refreshData() {
+        // Бағаны алу
+        const grade = localStorage.getItem('live_grade') || 0;
+        document.getElementById('studentGrade').innerText = grade;
+
+        // Тапсырмаларды алу
+        const tasks = JSON.parse(localStorage.getItem('live_tasks')) || [];
+        const tbody = document.getElementById('studentTasks');
+        tbody.innerHTML = "";
+        tasks.forEach(t => {
+            tbody.innerHTML += `<tr><td><b>${t.name}</b></td><td>${t.date}</td></tr>`;
+        });
+    }
+
+    // 5. БАСҚА ТЕРЕЗЕДЕГІ ӨЗГЕРІСТІ БІРДЕН СЕЗУ (STORAGE EVENT)
+    window.addEventListener('storage', (event) => {
+        if (event.key === 'live_grade' || event.key === 'live_tasks') {
+            refreshData();
+        }
+    });
+
+    // Бастапқы жүктеу
+    refreshData();
+</script>
+
+</body>
+</html>
