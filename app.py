@@ -3,16 +3,16 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.secret_key = 'bilim_iq_2026_top_secret'
+app.secret_key = 'super-secret-key-2026'
 
-# ДЕРЕКТЕР ҚОРЫНЫҢ ЖОЛЫН ДҰРЫСТАУ (RENDER ҮШІН МАҢЫЗДЫ)
+# Render-де SQLite базасын дұрыс сақтау үшін жолды баптау
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# Пайдаланушы моделі
+# Пайдаланушылар базасының моделі
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
@@ -28,13 +28,13 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get('user')
-        password = request.form.get('pass')
-        user = User.query.filter_by(username=username, password=password).first()
+        user_input = request.form.get('user')
+        pass_input = request.form.get('pass')
+        user = User.query.filter_by(username=user_input, password=pass_input).first()
         if user:
             session.update({'user_id': user.id, 'role': user.role, 'username': user.username})
             return redirect(url_for('teacher_dashboard' if user.role == 'teacher' else 'student_dashboard'))
-        return "Логин немесе құпия сөз қате!"
+        return "Қате логин немесе пароль!"
     return render_template('login.html')
 
 @app.route('/teacher')
@@ -52,10 +52,10 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
+# Сервер қосылғанда базаны бірден құру
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-        # Тесттік аккаунттарды тек жоқ болса қосамыз
         if not User.query.filter_by(username='teacher1').first():
             db.session.add(User(username='teacher1', password='123', role='teacher'))
             db.session.add(User(username='student1', password='123', role='student'))
