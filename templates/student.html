@@ -1,46 +1,60 @@
 <!DOCTYPE html>
-<html lang="kk">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Студент панелі</title>
     <style>
-        body { font-family: sans-serif; background: #f4f7f6; margin: 0; }
-        .header { background: #302b63; color: white; padding: 15px; text-align: center; }
-        .container { padding: 15px; max-width: 600px; margin: auto; }
-        .card { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        input, button { width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; }
-        button { background: #28a745; color: white; border: none; }
+        body { font-family: Arial; margin: 20px; background-color: #f0f0f0; }
+        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        .section { margin-top: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #eee; }
+        input, button { padding: 8px; margin: 5px 0; }
+        .logout-btn { color: red; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h3>Сәлем, {{ session.username }}!</h3>
-        <a href="/logout" style="color: white;">Шығу</a>
-    </div>
     <div class="container">
-        <div class="card">
-            <h4>Тапсырма жіберу</h4>
-            <form action="/upload" method="POST">
-                <input type="text" name="title" placeholder="Тапсырма аты (мысалы, Lab 1)" required>
-                <input type="url" name="file_url" placeholder="Файл сілтемесі (Google Drive/Firebase)" required>
-                <button type="submit">Жіберу</button>
+        <div class="header">
+            <h2>Bilim IQ: Студент кабинеті</h2>
+            <div>
+                <span>Пайдаланушы: <b>{{ session.username }}</b></span> | 
+                <a href="/logout" class="logout-btn">Шығу</a>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Тапсырманы жүктеу (Google Drive/Сурет сілтемесі)</h3>
+            <form action="/upload_task" method="POST">
+                <input type="text" name="title" placeholder="Тапсырма тақырыбы" required style="width: 250px;">
+                <input type="url" name="url" placeholder="Файлға сілтеме (URL)" required style="width: 350px;">
+                <button type="submit" style="background-color: #4CAF50; color: white; border: none; cursor: pointer;">Жіберу</button>
             </form>
         </div>
 
-        <div class="card">
-            <h4>Менің бағаларым</h4>
+        <div class="section">
+            <h3>Менің тапсырмаларым мен бағаларым</h3>
             <table>
-                <tr><th>Тапсырма</th><th>Күйі</th><th>Баға</th></tr>
-                {% for task in tasks %}
-                <tr>
-                    <td>{{ task.title }}</td>
-                    <td>{{ task.status }}</td>
-                    <td>{{ task.grade or '---' }}</td>
-                </tr>
-                {% endfor %}
+                <thead>
+                    <tr>
+                        <th>Тақырып</th>
+                        <th>Файл</th>
+                        <th>Баға</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks %}
+                    <tr>
+                        <td>{{ task.title }}</td>
+                        <td><a href="{{ task.file_url }}" target="_blank">Көру</a></td>
+                        <td><b>{{ task.grade if task.grade else 'Тексерілуде...' }}</b></td>
+                    </tr>
+                    {% endfor %}
+                    {% if not tasks %}
+                    <tr><td colspan="3" style="text-align: center;">Әзірге тапсырмалар жоқ.</td></tr>
+                    {% endif %}
+                </tbody>
             </table>
         </div>
     </div>
