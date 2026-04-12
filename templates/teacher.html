@@ -93,19 +93,20 @@
     <div class="tile wide" style="background: linear-gradient(45deg, rgba(155, 89, 182, 0.1), transparent);">
         <i class="fa-solid fa-file-circle-plus"></i>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h3 style="margin:0;">Жаңа тапсырма жариялау</h3>
+            <h3 style="margin:0;">Жаңа материал (Word, PPT, PDF)</h3>
             <a href="https://drive.google.com" target="_blank" class="btn-drive">
-                <i class="fa-brands fa-google-drive" style="position:static; font-size:1rem; opacity:1;"></i> Drive-қа өту
+                <i class="fa-brands fa-google-drive" style="position:static; font-size:1rem; opacity:1;"></i> Файл жүктеу (Drive)
             </a>
         </div>
         <form action="/post_task" method="POST">
             <div style="display: flex; gap: 10px;">
-                <input type="text" name="subject" class="post-input" placeholder="Пән атауы (мысалы: IT)" required>
-                <input type="url" name="url" class="post-input" placeholder="Google Drive сілтемесін қойыңыз" required>
+                <input type="text" name="subject" class="post-input" placeholder="Пән және материал түрі (мысалы: IT - Презентация)" required>
+                <input type="url" name="url" class="post-input" placeholder="Google Drive сілтемесін (Word/PPT) қойыңыз" required>
             </div>
-            <textarea name="desc" class="post-textarea" placeholder="Тапсырма сипаттамасы мен орындау мерзімі..." required></textarea>
+            <textarea name="desc" class="post-textarea" placeholder="Материал туралы қысқаша мәлімет немесе орындау мерзімі..." required></textarea>
             <button type="submit" class="btn-mini">Жариялау</button>
         </form>
+        <small style="opacity: 0.5; font-size: 0.7rem; margin-top: 5px;">* Drive-қа файлды жүктеп, "Доступ: Все, у кого есть ссылка" жасауды ұмытпаңыз.</small>
     </div>
 
     <div class="tile wide" style="background: linear-gradient(45deg, rgba(0,210,255,0.1), transparent);">
