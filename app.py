@@ -21,26 +21,27 @@ def index():
         return redirect(url_for('teacher_dashboard' if session.get('role') == 'teacher' else 'student_dashboard'))
     return redirect(url_for('login'))
 
+def set_user_session(username, role, display_name):
+    """Сессияны реттейтін көмекші функция"""
+    session.clear()
+    session['username'] = display_name
+    session['role'] = role
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        # Кірер алдында сессияны толық тазалаймыз
-        session.clear() 
         user = request.form.get('username')
         
         if user == 'admin':
-            session['username'] = 'Биғалиева Венера'
-            session['role'] = 'teacher'
+            set_user_session(user, 'teacher', 'Биғалиева Венера')
             return redirect(url_for('teacher_dashboard'))
             
         elif user == 'student':
-            session['username'] = 'Сұлтансиық Әлішер'
-            session['role'] = 'student'
+            set_user_session(user, 'student', 'Сұлтансиық Әлішер')
             return redirect(url_for('student_dashboard'))
             
         else:
-            session['username'] = user
-            session['role'] = 'student'
+            set_user_session(user, 'student', user)
             return redirect(url_for('student_dashboard'))
             
     return render_template('login.html')
