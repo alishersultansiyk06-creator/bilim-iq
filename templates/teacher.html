@@ -119,17 +119,22 @@
     <div class="tile wide" style="background: linear-gradient(45deg, rgba(0,210,255,0.1), transparent);">
         <i class="fa-solid fa-list-check"></i>
         <h3>Тексеру және бақылау</h3>
-        <div class="task-list" style="max-height: 150px; overflow-y: auto;">
+        <div class="task-list" style="max-height: 250px; overflow-y: auto;">
             {% for task, user in tasks %}
             <div class="task-row">
                 <span>{{ user.username }} - {{ task.title }}</span>
-                <form action="/grade_task/{{ task.id }}" method="POST">
-                    <a href="{{ task.file_url }}" target="_blank" style="color:var(--accent); margin-right:10px;">Файлды көру</a>
-                    <input type="text" name="grade" class="grade-input" value="{{ task.grade if task.grade else '' }}">
-                    <button type="submit" class="btn-mini">OK</button>
+                <form action="/grade_task/{{ task.id }}" method="POST" style="display: flex; align-items: center;">
+                    <a href="{{ url_for('static', filename='uploads/' + task.file_url) }}" target="_blank" style="color:var(--accent); margin-right:15px; text-decoration: none;">
+                        <i class="fa-solid fa-eye"></i> Файлды көру
+                    </a>
+                    <input type="text" name="grade" class="grade-input" value="{{ task.grade if task.grade else '' }}" placeholder="Баға">
+                    <button type="submit" class="btn-mini" style="margin-left: 5px;">OK</button>
                 </form>
             </div>
             {% endfor %}
+            {% if not tasks %}
+            <p style="opacity: 0.5; font-size: 0.9rem; text-align: center; padding: 10px;">Жіберілген тапсырмалар жоқ.</p>
+            {% endif %}
         </div>
     </div>
 
@@ -150,7 +155,7 @@
     <div class="tile wide" style="background: rgba(46, 204, 113, 0.1);">
         <i class="fa-solid fa-bullhorn"></i>
         <h3>Жаңалықтар мен Хабарламалар</h3>
-        <p>• Ғылыми конференцияға тіркелу басталды.<br>• Жаңа оқу бағдарламасы бекітілді.</p>
+        <p style="font-size: 0.9rem;">• Ғылыми конференцияға тіркелу басталды.<br>• Жаңа оқу бағдарламасы бекітілді.</p>
         <button class="btn-mini">Толығырақ</button>
     </div>
 
