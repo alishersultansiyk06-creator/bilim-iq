@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 import os
 
 app = Flask(__name__)
@@ -10,16 +10,26 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-# 2. МӘЛІМЕТТЕР (Есімдер осы жерде бекітілген, өзгермейді)
+# 2. МӘЛІМЕТТЕР (Есімдер мен парольдер осында бекітілген)
 USERS = {
-    'admin': {'name': 'Биғалиева Венера', 'role': 'teacher', 'route': 'teacher_dashboard'},
-    'student': {'name': 'Сұлтансиық Әлішер', 'role': 'student', 'route': 'student_dashboard'}
+    'admin': {
+        'name': 'Биғалиева Венера', 
+        'password': '123', # Мұғалімнің паролі
+        'role': 'teacher', 
+        'route': 'teacher_dashboard'
+    },
+    'student': {
+        'name': 'Сұлтансиық Әлішер', 
+        'password': '321', # Студенттің паролі
+        'role': 'student', 
+        'route': 'student_dashboard'
+    }
 }
 
-submissions = []      # Студенттер жіберген файлдар
-teacher_tasks = []    # Мұғалім жариялаған тапсырмалар
+submissions = []      
+teacher_tasks = []    
 
-# 3. МАРШРУТТАР (ROUTES)
+# 3. МАРШРУТТАР
 @app.route('/')
 def index():
     if 'username' in session:
@@ -30,19 +40,20 @@ def index():
 def login():
     if request.method == 'POST':
         username_input = request.form.get('username')
+        password_input = request.form.get('password')
+        
         session.clear()
         
-        # Егер логин 'admin' немесе 'student' болса, USERS ішінен есімдерді алады
-        if username_input in USERS:
+        # Пайдаланушы бар ма және пароль дұрыс па тексеру
+        if username_input in USERS and USERS[username_input]['password'] == password_input:
             user = USERS[username_input]
             session['username'] = user['name']
             session['role'] = user['role']
             return redirect(url_for(user['route']))
-        
-        # Егер басқа ат жазылса, сол атпен студент болып кіреді
-        session['username'] = username_input
-        session['role'] = 'student'
-        return redirect(url_for('student_dashboard'))
+        else:
+            # Қате болған жағдайда хабарлама жіберу
+            flash('Қате логин немесе құпия сөз!', 'danger')
+            return redirect(url_for('login'))
             
     return render_template('login.html')
 
@@ -53,7 +64,8 @@ def post_task():
     
     file = request.files.get('file')
     if file:
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        file.save(file_path)
         teacher_tasks.append({
             "subject": request.form.get('subject'),
             "description": request.form.get('desc'),
@@ -80,7 +92,7 @@ def upload_task():
         submissions.append({
             "id": len(submissions) + 1,
             "title": request.form.get('title'),
-            "student_name": session['username'], # Осында Әлішердің есімі сақталады
+            "student_name": session['username'],
             "file_url": file.filename,
             "grade": None
         })
@@ -89,11 +101,13 @@ def upload_task():
 # --- ПАНЕЛЬДЕР ---
 @app.route('/student_dashboard')
 def student_dashboard():
+    if 'username' not in session: return redirect(url_for('login'))
     user_tasks = [s for s in submissions if s['student_name'] == session.get('username')]
     return render_template('student.html', teacher_tasks=teacher_tasks, tasks=user_tasks)
 
 @app.route('/teacher_dashboard')
 def teacher_dashboard():
+    if session.get('role') != 'teacher': return redirect(url_for('login'))
     formatted = [(s, {"username": s['student_name']}) for s in submissions]
     return render_template('teacher.html', tasks=formatted)
 
