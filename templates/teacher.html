@@ -56,6 +56,18 @@
             color: white; text-align: center; border-radius: 4px;
         }
 
+        /* Жаңа тапсырма формасының стилі */
+        .post-input {
+            width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 8px;
+            border: 1px solid var(--border); background: rgba(0,0,0,0.3); color: white;
+            box-sizing: border-box; outline: none;
+        }
+        .post-textarea {
+            width: 100%; height: 50px; padding: 8px; border-radius: 8px;
+            border: 1px solid var(--border); background: rgba(0,0,0,0.3); color: white;
+            box-sizing: border-box; outline: none; margin-bottom: 8px; font-family: inherit;
+        }
+
         /* Header */
         header {
             max-width: 1200px; margin: 0 auto 30px;
@@ -68,12 +80,25 @@
 <header>
     <div>
         <h1 style="margin:0; color:var(--accent);">Bilim IQ</h1>
-        <small>Оқытушы: {{ Биғалиева Венера Хамидоллақызы }}</small>
+        <small>Оқытушы: {{ session.username }}</small>
     </div>
     <a href="/logout" style="color: #ff4d4d; text-decoration: none;">Шығу <i class="fa-solid fa-right-from-bracket"></i></a>
 </header>
 
 <div class="dashboard">
+    <div class="tile wide" style="background: linear-gradient(45deg, rgba(155, 89, 182, 0.1), transparent);">
+        <i class="fa-solid fa-file-circle-plus"></i>
+        <h3>Жаңа тапсырма жариялау</h3>
+        <form action="/post_task" method="POST">
+            <div style="display: flex; gap: 10px;">
+                <input type="text" name="subject" class="post-input" placeholder="Пән атауы (мысалы: IT)" required>
+                <input type="url" name="url" class="post-input" placeholder="Материалға сілтеме (Drive)" required>
+            </div>
+            <textarea name="desc" class="post-textarea" placeholder="Тапсырма сипаттамасы мен орындау мерзімі..." required></textarea>
+            <button type="submit" class="btn-mini">Жариялау</button>
+        </form>
+    </div>
+
     <div class="tile wide" style="background: linear-gradient(45deg, rgba(0,210,255,0.1), transparent);">
         <i class="fa-solid fa-list-check"></i>
         <h3>Тексеру және бақылау</h3>
