@@ -1,46 +1,118 @@
 <!DOCTYPE html>
-<html>
+<html lang="kk">
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilim IQ | Студент Панелі</title>
     <style>
-        body { background: #090A0F; color: white; font-family: sans-serif; margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: auto; }
-        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border-radius: 20px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
-        .header { display: flex; justify-content: space-between; align-items: center; }
-        input, button { padding: 10px; border-radius: 10px; border: none; margin: 5px; }
-        button { background: #3a7bd5; color: white; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .grade { color: #00ffcc; font-weight: bold; }
+        :root {
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --text-color: #ffffff;
+            --accent: #00d2ff;
+        }
+        body {
+            margin: 0; padding: 20px;
+            background: radial-gradient(circle at top, #1B2735 0%, #090A0F 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-color);
+        }
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px; background: var(--card-bg); backdrop-filter: blur(10px);
+            border-radius: 15px; margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 45px; height: 45px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+        /* Плиткалар торы */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: var(--card-bg); backdrop-filter: blur(15px);
+            border-radius: 20px; padding: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: 0.3s transform ease;
+            position: relative; overflow: hidden;
+            min-height: 180px; display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .card:hover { transform: translateY(-10px); background: rgba(255,255,255,0.15); }
+        .card h3 { margin: 0; font-size: 1.4rem; z-index: 2; }
+        
+        /* Батырмалар */
+        .btn-open {
+            background: var(--accent); border: none; padding: 10px 20px;
+            border-radius: 10px; color: #000; font-weight: bold; cursor: pointer;
+            width: fit-content; text-decoration: none; text-align: center;
+        }
+        
+        /* Тапсырма жіберу формасы плитка ішінде */
+        .upload-form input {
+            width: 100%; padding: 8px; margin: 5px 0; border-radius: 8px;
+            border: none; background: rgba(0,0,0,0.3); color: white;
+        }
+
+        /* Түстер (плиткаларға әртүрлі түс беру) */
+        .blue { border-left: 5px solid #3498db; }
+        .green { border-left: 5px solid #2ecc71; }
+        .orange { border-left: 5px solid #e67e22; }
+        .purple { border-left: 5px solid #9b59b6; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="glass header">
-            <h2>Bilim IQ</h2>
-            <a href="/logout" style="color: #ff4d4d; text-decoration: none;">Шығу</a>
+
+<div class="container">
+    <div class="header">
+        <div class="user-info">
+            <div class="avatar">ӘС</div>
+            <div>
+                <div style="font-size: 0.8rem; opacity: 0.7;">Студент:</div>
+                <div style="font-weight: bold;">{{ session.username }}</div>
+            </div>
         </div>
-        <div class="glass">
-            <h3>Тапсырма жіберу</h3>
-            <form action="/upload_task" method="POST">
-                <input type="text" name="title" placeholder="Тақырып" required style="width: 30%;">
-                <input type="url" name="url" placeholder="Сілтеме" required style="width: 45%;">
-                <button type="submit">Жіберу</button>
-            </form>
+        <a href="/logout" style="color: #ff4d4d; text-decoration: none; font-weight: bold;">ШЫҒУ</a>
+    </div>
+
+    <div class="grid-container">
+        <div class="card blue">
+            <h3>Тапсырмалар</h3>
+            <div class="upload-form">
+                <form action="/upload_task" method="POST">
+                    <input type="text" name="title" placeholder="Тақырып (Лаб 1)" required>
+                    <input type="url" name="url" placeholder="Drive сілтемесі" required>
+                    <button type="submit" class="btn-open" style="margin-top: 10px;">Жіберу</button>
+                </form>
+            </div>
         </div>
-        <div class="glass">
-            <h3>Нәтижелерім</h3>
-            <table>
-                <tr><th>Тақырып</th><th>Файл</th><th>Баға</th></tr>
+
+        <div class="card green">
+            <h3>Менің пәндерім (Бағалар)</h3>
+            <div style="max-height: 120px; overflow-y: auto; margin-top: 10px;">
                 {% for task in tasks %}
-                <tr>
-                    <td>{{ task.title }}</td>
-                    <td><a href="{{ task.file_url }}" target="_blank" style="color: #00d2ff;">Ашу</a></td>
-                    <td class="grade">{{ task.grade if task.grade else '...' }}</td>
-                </tr>
+                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding: 5px 0;">
+                    <span>{{ task.title }}</span>
+                    <span style="color: #00ffcc; font-weight: bold;">{{ task.grade if task.grade else '...' }}</span>
+                </div>
                 {% endfor %}
-            </table>
+            </div>
+            <a href="#" class="btn-open" style="margin-top: 10px;">Толығырақ</a>
+        </div>
+
+        <div class="card orange">
+            <h3>Сабақ кестесі</h3>
+            <p style="opacity: 0.7; font-size: 0.9rem;">Бүгін: Дүйсенбі<br>1-пара: IT технологиялар</p>
+            <a href="#" class="btn-open">Ашу</a>
+        </div>
+
+        <div class="card purple">
+            <h3>Кітапхана</h3>
+            <p style="opacity: 0.7; font-size: 0.9rem;">245 жаңа кітап қосылды</p>
+            <a href="#" class="btn-open">Ашу</a>
         </div>
     </div>
+</div>
+
 </body>
 </html>
