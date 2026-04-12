@@ -1,47 +1,27 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Студент кабинеті</title>
-    <style>
-        body { font-family: Arial; margin: 20px; background-color: #f0f0f0; }
-        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 10px; }
-        .section { margin-top: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        input, button { padding: 8px; margin: 5px 0; }
-        button { background-color: #4CAF50; color: white; border: none; cursor: pointer; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h2>Bilim IQ: Студент кабинеті</h2>
-            <a href="/logout" style="color: red; text-decoration: none;">Шығу</a>
-        </div>
-
-        <div class="section">
-            <h3>Тапсырма жүктеу</h3>
-            <form action="/upload_task" method="POST">
-                <input type="text" name="title" placeholder="Тақырып" required>
-                <input type="url" name="url" placeholder="Сілтеме (URL)" required>
-                <button type="submit">Жіберу</button>
-            </form>
-        </div>
-
-        <div class="section">
-            <h3>Менің бағаларым</h3>
-            <table>
-                <tr><th>Тапсырма</th><th>Файл</th><th>Баға</th></tr>
-                {% for task in tasks %}
-                <tr>
-                    <td>{{ task.title }}</td>
-                    <td><a href="{{ task.file_url }}" target="_blank">Көру</a></td>
-                    <td><b>{{ task.grade if task.grade else 'Тексерілуде...' }}</b></td>
-                </tr>
-                {% endfor %}
-            </table>
-        </div>
-    </div>
+<head><title>Студент</title></head>
+<body style="font-family: Arial; margin: 40px;">
+    <h2>Bilim IQ - Студент: {{ session.username }}</h2>
+    <a href="/logout">Шығу</a>
+    <hr>
+    <h3>Тапсырма жіберу</h3>
+    <form action="/upload_task" method="POST">
+        <input type="text" name="title" placeholder="Тақырып" required>
+        <input type="url" name="url" placeholder="Файлға сілтеме" required>
+        <button type="submit">Жіберу</button>
+    </form>
+    <hr>
+    <h3>Нәтижелерім</h3>
+    <table border="1" cellpadding="10">
+        <tr><th>Тапсырма</th><th>Сілтеме</th><th>Баға</th></tr>
+        {% for task in tasks %}
+        <tr>
+            <td>{{ task.title }}</td>
+            <td><a href="{{ task.file_url }}" target="_blank">Көру</a></td>
+            <td>{{ task.grade if task.grade else 'Тексерілуде...' }}</td>
+        </tr>
+        {% endfor %}
+    </table>
 </body>
 </html>
