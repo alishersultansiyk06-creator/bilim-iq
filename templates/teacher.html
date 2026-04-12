@@ -2,29 +2,32 @@
 <html>
 <head>
     <title>Мұғалім кабинеті</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: Arial; margin: 20px; background-color: #f4f4f4; }
-        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); max-width: 900px; margin: auto; }
+        body { font-family: Arial; margin: 20px; background-color: #f0f0f0; }
+        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 10px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        th { background-color: #333; color: white; }
-        .grade-input { width: 50px; padding: 5px; border-radius: 4px; border: 1px solid #ccc; }
-        .save-btn { background-color: #007bff; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; }
+        th { background-color: #eee; }
+        input { width: 50px; padding: 5px; }
+        button { padding: 5px 10px; background-color: #007bff; color: white; border: none; cursor: pointer; border-radius: 4px; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h2>Bilim IQ: Тексеру панелі</h2>
-            <a href="/logout" style="color: red; text-decoration: none;">Шығу</a>
+            <h2>Bilim IQ: Мұғалім панелі</h2>
+            <div>
+                <span>Мұғалім: <b>{{ session.username }}</b></span> | 
+                <a href="/logout" style="color: red; text-decoration: none;">Шығу</a>
+            </div>
         </div>
 
+        <h3>Студенттердің тапсырмалары</h3>
         <table>
             <tr>
                 <th>Студент</th>
-                <th>Тапсырма</th>
+                <th>Тақырып</th>
                 <th>Файл</th>
                 <th>Баға қою</th>
             </tr>
@@ -32,11 +35,11 @@
             <tr>
                 <td>{{ user.username }}</td>
                 <td>{{ task.title }}</td>
-                <td><a href="{{ task.file_url }}" target="_blank">Көру</a></td>
+                <td><a href="{{ task.file_url }}" target="_blank">Ашу</a></td>
                 <td>
-                    <form action="/grade_task/{{ task.id }}" method="POST">
-                        <input type="text" name="grade" class="grade-input" value="{{ task.grade if task.grade else '' }}">
-                        <button type="submit" class="save-btn">Сақтау</button>
+                    <form action="/grade_task/{{ task.id }}" method="POST" style="display: flex; gap: 5px;">
+                        <input type="text" name="grade" placeholder="---" value="{{ task.grade if task.grade else '' }}">
+                        <button type="submit">Сақтау</button>
                     </form>
                 </td>
             </tr>
