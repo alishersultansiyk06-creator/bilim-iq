@@ -3,14 +3,12 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.secret_key = 'bilim_iq_ultra_secret'
+app.secret_key = 'bilim_iq_cosmos_2026'
 
-# Дұрыс жолды көрсету
+# База баптаулары
 basedir = os.path.abspath(os.path.dirname(__file__))
-db_path = os.path.join(basedir, 'database.db')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_path
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 db = SQLAlchemy(app)
 
 # Модельдер
@@ -27,18 +25,17 @@ class Assignment(db.Model):
     file_url = db.Column(db.String(200))
     grade = db.Column(db.String(10), nullable=True)
 
-# Бұл функция базаны әрқашан тексеріп отырады
-def setup_database():
-    with app.app_context():
-        db.create_all()
-        if not User.query.filter_by(username='teacher1').first():
-            db.session.add(User(username='teacher1', password='123', role='teacher'))
-            db.session.add(User(username='student1', password='123', role='student'))
-            db.session.commit()
+@app.before_request
+def init_app():
+    app.before_request_funcs[None].remove(init_app)
+    db.create_all()
+    if not User.query.filter_by(username='teacher1').first():
+        db.session.add(User(username='teacher1', password='123', role='teacher'))
+        db.session.add(User(username='student1', password='123', role='student'))
+        db.session.commit()
 
 @app.route('/')
 def index():
-    setup_database() # Кірген сайын базаны тексереді
     if 'user_id' in session:
         return redirect(url_for('student_dashboard' if session['role'] == 'student' else 'teacher_dashboard'))
     return redirect(url_for('login'))
@@ -86,5 +83,4 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    setup_database()
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
