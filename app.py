@@ -1,101 +1,78 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session
 from datetime import timedelta
 import os
 
 app = Flask(__name__)
 
-# Сессия параметрлері
-app.secret_key = 'alisher_bilim_iq_2026_key'
-app.permanent_session_lifetime = timedelta(days=7)
+# --- СЕССИЯНЫ БЕКІТУ (ЛОГИННЕН ШЫҚПАУ ҮШІН ЕҢ МАҢЫЗДЫ БӨЛІМ) ---
+# 1. Секреттік кілтті міндетті түрде тұрақты мәтін қыл. 
+# Бұл сервер қайта қосылса да, браузердегі адамды тануға көмектеседі.
+app.secret_key = 'bilim_iq_permanent_secret_key_2026' 
 
-# ПАЙДАЛАНУШЫЛАР
+# 2. Сессияның өмір сүру уақытын ұзарту (мысалы, 31 күн)
+app.permanent_session_lifetime = timedelta(days=31)
+
+# Пайдаланушылар базасы (мұғалім мен студент)
 users = {
-    "admin": {"password": "123", "role": "teacher", "username": "Биғалиева Венера (Мұғалім)"},
-    "student": {"password": "123", "role": "student", "username": "Сұлтансиық Әлішер"}
+    "admin": {"password": "123", "role": "teacher", "name": "Биғалиева Венера (Мұғалім)"},
+    "student": {"password": "123", "role": "student", "name": "Сұлтансиық Әлішер"}
 }
 
-# МӘЛІМЕТТЕР ҚОРЫНЫҢ ОРНЫНА (Уақытша тізімдер)
-# Оқытушы жариялаған тапсырмалар
-teacher_tasks_list = [
-    {"id": 1, "subject": "Сандық әдістер", "description": "№1 зертханалық жұмыс", "file_url": "#"}
-]
-
-# Студенттер жіберген жұмыстар (Мұғалім тексеруі үшін)
-submitted_tasks = [
-    # Форматы: (Тапсырма мәліметі, Пайдаланушы мәліметі)
-    ({"id": 101, "title": "Зертханалық №1", "file_url": "lab1_student.pdf", "grade": "90"}, {"username": "Сұлтансиық Әлішер"})
-]
+# Тесттік мәліметтер (қате шықпауы үшін)
+teacher_tasks = [{"subject": "Информатика", "description": "Python негіздері", "file_url": "#"}]
+submitted_tasks = [] 
 
 @app.route('/')
 def index():
+    # Егер сессия бар болса, рөліне қарай панельге жіберу
     if 'username' in session:
-        return redirect(url_for('teacher_dashboard' if session.get('role') == 'teacher' else 'student_dashboard'))
+        if session.get('role') == 'teacher':
+            return redirect(url_for('teacher_dashboard'))
+        return redirect(url_for('student_dashboard'))
+    # Сессия жоқ болса ғана логинге жіберу
     return redirect(url_for('login'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
+        # HTML-дегі name="username" және name="password" арқылы аламыз
         user_in = request.form.get('username')
         pass_in = request.form.get('password')
         
         if user_in in users and users[user_in]['password'] == pass_in:
-            session.permanent = True
-            session['username'] = users[user_in]['username']
+            session.clear() # Ескі қате сессияны тазалау
+            session.permanent = True # Сессияны тұрақты (permanent) қылу
+            session['username'] = user_in
             session['role'] = users[user_in]['role']
+            session['display_name'] = users[user_in]['name']
             return redirect(url_for('index'))
-        return "Қате! <a href='/login'>Қайтадан</a>"
+        else:
+            return "Қате логин немесе пароль! <a href='/login'>Қайта көру</a>"
+            
     return render_template('login.html')
 
-# --- СТУДЕНТ ПОРТАЛЫ ---
 @app.route('/student_dashboard')
 def student_dashboard():
+    # Тексеріс: Егер сессия жоқ болса немесе рөлі қате болса ғана логинге
     if 'username' not in session or session.get('role') != 'student':
         return redirect(url_for('login'))
     
-    # Студент өз бағаларын көруі үшін
-    my_grades = [task[0] for task in submitted_tasks if task[1]['username'] == session['username']]
-    
-    return render_template('student.html', 
-                           teacher_tasks=teacher_tasks_list, 
-                           tasks=my_grades)
+    return render_template('student.html', teacher_tasks=teacher_tasks, tasks=[])
 
-# --- МҰҒАЛІМ ПОРТАЛЫ ---
 @app.route('/teacher_dashboard')
 def teacher_dashboard():
+    # Тексеріс: Мұғалім екенін растау
     if 'username' not in session or session.get('role') != 'teacher':
         return redirect(url_for('login'))
     
     return render_template('teacher.html', tasks=submitted_tasks)
 
-# ТАПСЫРМА ЖАРИЯЛАУ (Мұғалім үшін)
-@app.route('/post_task', methods=['POST'])
-def post_task():
-    if session.get('role') == 'teacher':
-        subject = request.form.get('subject')
-        desc = request.form.get('desc')
-        # Файлды сақтау логикасы осы жерде болуы керек
-        teacher_tasks_list.append({
-            "id": len(teacher_tasks_list)+1,
-            "subject": subject,
-            "description": desc,
-            "file_url": "#"
-        })
-    return redirect(url_for('teacher_dashboard'))
-
-# БАҒА ҚОЮ (Мұғалім үшін)
-@app.route('/grade_task/<int:task_id>', methods=['POST'])
-def grade_task(task_id):
-    grade = request.form.get('grade')
-    for task, user in submitted_tasks:
-        if task['id'] == task_id:
-            task['grade'] = grade
-            break
-    return redirect(url_for('teacher_dashboard'))
-
 @app.route('/logout')
 def logout():
-    session.clear()
+    session.clear() # Жүйеден шыққанда ғана сессияны жою
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Render-де жұмыс істеуі үшін host пен port
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
