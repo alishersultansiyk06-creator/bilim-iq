@@ -17,13 +17,11 @@ USERS = {
         'name': 'Биғалиева Венера', 
         'password': '123', 
         'role': 'teacher', 
-        'route': 'teacher_dashboard'
     },
     'student': {
         'name': 'Сұлтансиық Әлішер', 
         'password': '321', 
         'role': 'student', 
-        'route': 'student_dashboard'
     }
 }
 
