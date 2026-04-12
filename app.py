@@ -1,61 +1,86 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = 'bilim_iq_secret_2026'
+app.secret_key = 'bilim_iq_2026_pro'
 
-# База жолын анықтау
+# База жолы
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# Пайдаланушы моделі
+# --- МОДЕЛЬДЕР ---
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(50), nullable=False)
-    role = db.Column(db.String(10), nullable=False)
+    role = db.Column(db.String(10), nullable=False) # 'teacher' немесе 'student'
+    avatar = db.Column(db.String(200), default='https://cdn-icons-png.flaticon.com/512/149/149071.png')
 
-# БАЗАНЫ АВТОМАТТЫ ҚҰРУ ФУНКЦИЯСЫ
+class Assignment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    title = db.Column(db.String(100))
+    file_url = db.Column(db.String(200))
+    grade = db.Column(db.String(10), nullable=True)
+    status = db.Column(db.String(20), default='Жіберілді')
+
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sender = db.Column(db.String(50))
+    text = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+# --- РОУТТАР ---
+@app.before_request
 def init_db():
-    with app.app_context():
+    if not os.path.exists(os.path.join(basedir, 'database.db')):
         db.create_all()
-        # Егер базада ешкім болмаса, тесттік адамдарды қосамыз
-        if not User.query.filter_by(username='teacher1').first():
-            db.session.add(User(username='teacher1', password='123', role='teacher'))
-            db.session.add(User(username='student1', password='123', role='student'))
-            db.session.commit()
+        db.session.add(User(username='teacher1', password='123', role='teacher'))
+        db.session.add(User(username='student1', password='123', role='student'))
+        db.session.commit()
 
 @app.route('/')
 def index():
-    # Әр жолы басты бетке кіргенде базаның бар-жоғын тексереді
-    init_db()
     return redirect(url_for('login'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        u = request.form.get('user')
-        p = request.form.get('pass')
+        u, p = request.form.get('user'), request.form.get('pass')
         user = User.query.filter_by(username=u, password=p).first()
         if user:
-            session.update({'user_id': user.id, 'role': user.role})
-            return redirect(url_for('teacher_dashboard' if user.role == 'teacher' else 'student_dashboard'))
-        return "Қате логин немесе пароль!"
+            session.update({'user_id': user.id, 'role': user.role, 'username': user.username})
+            return redirect(url_for('dashboard'))
     return render_template('login.html')
 
-@app.route('/teacher')
-def teacher_dashboard():
-    if session.get('role') != 'teacher': return redirect(url_for('login'))
-    return render_template('teacher.html')
+@app.route('/dashboard')
+def dashboard():
+    if 'user_id' not in session: return redirect(url_for('login'))
+    if session['role'] == 'teacher':
+        tasks = Assignment.query.all()
+        return render_template('teacher.html', tasks=tasks)
+    else:
+        my_tasks = Assignment.query.filter_by(student_id=session['user_id']).all()
+        return render_template('student.html', tasks=my_tasks)
 
-@app.route('/student')
-def student_dashboard():
-    if session.get('role') != 'student': return redirect(url_for('login'))
-    return render_template('student.html')
+@app.route('/upload', methods=['POST'])
+def upload():
+    file_url = request.form.get('file_url')
+    title = request.form.get('title')
+    new_task = Assignment(student_id=session['user_id'], title=title, file_url=file_url)
+    db.session.add(new_task)
+    db.session.commit()
+    return redirect(url_for('dashboard'))
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
