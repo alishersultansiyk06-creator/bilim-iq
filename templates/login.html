@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="kk">
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bilim IQ - Кіру</title>
     <style>
@@ -19,11 +20,12 @@
         }
         input {
             width: 100%; padding: 12px; margin: 10px 0; border-radius: 12px;
-            border: none; background: rgba(255, 255, 255, 0.1); color: white; outline: none;
-            box-sizing: border-box;
+            border: 1px solid rgba(255,255,255,0.1); background: rgba(255, 255, 255, 0.1); 
+            color: white; outline: none; box-sizing: border-box;
         }
+        input::placeholder { color: rgba(255,255,255,0.5); }
         button {
-            width: 100%; padding: 12px; border-radius: 12px; border: none;
+            width: 100%; padding: 12px; border-radius: 12px; border: none; margin-top: 10px;
             background: linear-gradient(45deg, #00d2ff, #3a7bd5);
             color: white; font-weight: bold; cursor: pointer; transition: 0.3s;
         }
@@ -32,10 +34,10 @@
 </head>
 <body>
     <div class="glass-card">
-        <h1>Bilim IQ</h1>
-        <form method="POST">
-            <input type="text" name="user" placeholder="Логин" required>
-            <input type="password" name="pass" placeholder="Құпия сөз" required>
+        <h1>Bilim <span style="color:#00d2ff;">IQ</span></h1>
+        <form action="/login" method="POST">
+            <input type="text" name="username" placeholder="Логин" required>
+            <input type="password" name="password" placeholder="Құпия сөз" required>
             <button type="submit">Кіру</button>
         </form>
     </div>
