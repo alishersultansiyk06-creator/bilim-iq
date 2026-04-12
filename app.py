@@ -1,51 +1,47 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = 'bilim_iq_2026_pro'
+app.secret_key = 'bilim_iq_final_2026'
 
-# База жолы
+# База жолы (Render үшін бапталған)
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# --- МОДЕЛЬДЕР ---
+# --- МОДЕЛЬДЕР (Кестелер) ---
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(50), nullable=False)
     role = db.Column(db.String(10), nullable=False) # 'teacher' немесе 'student'
-    avatar = db.Column(db.String(200), default='https://cdn-icons-png.flaticon.com/512/149/149071.png')
 
 class Assignment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     title = db.Column(db.String(100))
     file_url = db.Column(db.String(200))
-    grade = db.Column(db.String(10), nullable=True)
-    status = db.Column(db.String(20), default='Жіберілді')
+    grade = db.Column(db.String(10), nullable=True) # Мұғалім қоятын баға
 
-class Message(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    sender = db.Column(db.String(50))
-    text = db.Column(db.Text)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-
-# --- РОУТТАР ---
+# --- БАЗАНЫ ДАЙЫНДАУ ---
 @app.before_request
-def init_db():
-    if not os.path.exists(os.path.join(basedir, 'database.db')):
-        db.create_all()
+def create_tables():
+    # Бұл функция база жоқ болса құрады және тесттік аккаунттарды қосады
+    app.before_request_funcs[None].remove(create_tables)
+    db.create_all()
+    if not User.query.filter_by(username='teacher1').first():
         db.session.add(User(username='teacher1', password='123', role='teacher'))
         db.session.add(User(username='student1', password='123', role='student'))
         db.session.commit()
 
+# --- БЕТТЕР (ROUTES) ---
 @app.route('/')
 def index():
+    if 'user_id' in session:
+        return redirect(url_for('student_dashboard' if session['role'] == 'student' else 'teacher_dashboard'))
     return redirect(url_for('login'))
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -55,27 +51,46 @@ def login():
         user = User.query.filter_by(username=u, password=p).first()
         if user:
             session.update({'user_id': user.id, 'role': user.role, 'username': user.username})
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('index'))
+        return "Қате логин немесе пароль!"
     return render_template('login.html')
 
-@app.route('/dashboard')
-def dashboard():
-    if 'user_id' not in session: return redirect(url_for('login'))
-    if session['role'] == 'teacher':
-        tasks = Assignment.query.all()
-        return render_template('teacher.html', tasks=tasks)
-    else:
-        my_tasks = Assignment.query.filter_by(student_id=session['user_id']).all()
-        return render_template('student.html', tasks=my_tasks)
+# Студент панелі
+@app.route('/student')
+def student_dashboard():
+    if session.get('role') != 'student': return redirect(url_for('login'))
+    tasks = Assignment.query.filter_by(student_id=session['user_id']).all()
+    return render_template('student.html', tasks=tasks)
 
-@app.route('/upload', methods=['POST'])
-def upload():
-    file_url = request.form.get('file_url')
+# Тапсырма жүктеу (Студент)
+@app.route('/upload_task', methods=['POST'])
+def upload_task():
+    if 'user_id' not in session: return redirect(url_for('login'))
     title = request.form.get('title')
-    new_task = Assignment(student_id=session['user_id'], title=title, file_url=file_url)
+    url = request.form.get('url')
+    new_task = Assignment(student_id=session['user_id'], title=title, file_url=url)
     db.session.add(new_task)
     db.session.commit()
-    return redirect(url_for('dashboard'))
+    return redirect(url_for('student_dashboard'))
+
+# Мұғалім панелі
+@app.route('/teacher')
+def teacher_dashboard():
+    if session.get('role') != 'teacher': return redirect(url_for('login'))
+    # Барлық тапсырмаларды студенттің атымен бірге алу
+    all_tasks = db.session.query(Assignment, User).join(User).all()
+    return render_template('teacher.html', tasks=all_tasks)
+
+# БАҒА ҚОЮ (Мұғалім осы жерде бағаны сақтайды)
+@app.route('/grade_task/<int:task_id>', methods=['POST'])
+def grade_task(task_id):
+    if session.get('role') != 'teacher': return redirect(url_for('login'))
+    grade_val = request.form.get('grade')
+    task = Assignment.query.get(task_id)
+    if task:
+        task.grade = grade_val
+        db.session.commit() # Базаға біржола сақтау
+    return redirect(url_for('teacher_dashboard'))
 
 @app.route('/logout')
 def logout():
