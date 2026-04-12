@@ -26,7 +26,8 @@ def login():
     if request.method == 'POST':
         user = request.form.get('username')
         if user == 'admin':
-            session['username'] = 'Оқытушы'
+            # Мұнда 'Оқытушы' сөзін '' деп ауыстырдық
+            session['username'] = 'Биғалиева Венера'
             session['role'] = 'teacher'
         else:
             session['username'] = user
@@ -34,7 +35,7 @@ def login():
         return redirect(url_for('index'))
     return render_template('login.html')
 
-# --- МҰҒАЛІМНІҢ ТАПСЫРМА ЖАРИЯЛАУЫ (ОСЫ ЖЕР ЖЕТІСПЕЙ ТҰРҒАН ЕДІ) ---
+# --- МҰҒАЛІМНІҢ ТАПСЫРМА ЖАРИЯЛАУЫ ---
 @app.route('/post_task', methods=['POST'])
 def post_task():
     if session.get('role') != 'teacher': return redirect(url_for('login'))
@@ -47,7 +48,6 @@ def post_task():
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
         file.save(file_path)
         
-        # Мұғалімнің тізіміне қосамыз
         teacher_tasks_list.append({
             "subject": subject,
             "description": desc,
@@ -87,7 +87,6 @@ def grade_task(task_id):
 @app.route('/student_dashboard')
 def student_dashboard():
     my_tasks = [s for s in submissions if s['student_name'] == session['username']]
-    # teacher_tasks_list-ті студентке жіберуді ұмытпаймыз
     return render_template('student.html', teacher_tasks=teacher_tasks_list, tasks=my_tasks)
 
 @app.route('/teacher_dashboard')
