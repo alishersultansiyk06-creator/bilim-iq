@@ -8,7 +8,7 @@ app.permanent_session_lifetime = timedelta(days=7) # 7 күнге сақтау
 # Пайдаланушылар
 users = {
     "student": {"password": "123", "role": "student"},
-    "teacher": {"password": "123", "role": "teacher"}
+    "admin": {"password": "123", "role": "teacher"}
 }
 
 @app.route('/')
