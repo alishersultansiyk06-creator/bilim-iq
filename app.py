@@ -1,24 +1,15 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-from datetime import timedelta
 import os
 
 app = Flask(__name__)
+app.secret_key = 'bilim_iq_2026'
 
-# Сессия тұрақтылығы үшін
-app.secret_key = 'bilim_iq_2026_permanent_key'
-app.permanent_session_lifetime = timedelta(days=31)
+# 1. ОРТАҚ ДЕРЕКТЕР ТІЗІМІ (Мұғалім мен Студент осыны көреді)
+# Студент жіберген жұмыстар осы тізімге түседі
+submissions = []
 
-# Пайдаланушылар
-users = {
-    "admin": {"password": "123", "role": "teacher"},
-    "student": {"password": "123", "role": "student"}
-}
-
-# Мысал мәліметтер
-teacher_tasks_data = [
-    {"subject": "IT", "description": "Python-да Flask негіздері", "file_url": "#"}
-]
-student_submissions = []
+# Оқытушы жариялаған тапсырмалар
+teacher_announcements = []
 
 @app.route('/')
 def index():
@@ -29,48 +20,59 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        user_in = request.form.get('username')
-        pass_in = request.form.get('password')
-        if user_in in users and users[user_in]['password'] == pass_in:
-            session.permanent = True
-            session['username'] = user_in
-            session['role'] = users[user_in]['role']
-            return redirect(url_for('index'))
+        user = request.form.get('username')
+        if user == 'admin': # Мұғалім
+            session['username'] = 'Оқытушы'
+            session['role'] = 'teacher'
+        else: # Студент
+            session['username'] = user
+            session['role'] = 'student'
+        return redirect(url_for('index'))
     return render_template('login.html')
 
+# --- СТУДЕНТ БЕТІ ---
 @app.route('/student_dashboard')
 def student_dashboard():
-    if 'username' not in session or session.get('role') != 'student':
-        return redirect(url_for('login'))
-    # HTML-дегі {% for task in tasks %} мен {% for t_task in teacher_tasks %} үшін:
-    return render_template('student.html', teacher_tasks=teacher_tasks_data, tasks=student_submissions)
+    if session.get('role') != 'student': return redirect(url_for('login'))
+    
+    # Студент тек өз тапсырмаларын көреді
+    my_tasks = [s for s in submissions if s['student_name'] == session['username']]
+    return render_template('student.html', teacher_tasks=teacher_announcements, tasks=my_tasks)
 
-# --- ОСЫ БӨЛІМ СЕНДЕГІ 404 ҚАТЕСІН ЖӨНДЕЙДІ ---
+# --- ТАПСЫРМАНЫ ҚАБЫЛДАУ (ОСЫ ЖЕРДЕ ҚАТЕ БОЛҒАН) ---
 @app.route('/upload_task', methods=['POST'])
 def upload_task():
-    if 'username' not in session:
-        return redirect(url_for('login'))
+    if 'username' not in session: return redirect(url_for('login'))
     
-    # HTML-дегі name="title" және name="file" арқылы деректерді аламыз
     title = request.form.get('title')
     file = request.files.get('file')
     
-    if file and title:
-        # Жаңа жіберілген жұмысты тізімге қосамыз (бағасы жоқ, "Тексерілуде" деп шығады)
-        student_submissions.append({
+    if title and file:
+        # Жаңа жұмысты ортақ submissions тізіміне қосамыз
+        new_entry = {
+            "id": len(submissions) + 1,
             "title": title,
-            "grade": None,
-            "file_name": file.filename
-        })
-        print(f"Жаңа жұмыс қабылданды: {title}")
+            "student_name": session['username'],
+            "file_url": file.filename,
+            "grade": None # Әлі тексерілмеген
+        }
+        submissions.append(new_entry)
         
     return redirect(url_for('student_dashboard'))
 
+# --- МҰҒАЛІМ БЕТІ ---
 @app.route('/teacher_dashboard')
 def teacher_dashboard():
-    if 'username' not in session or session.get('role') != 'teacher':
-        return redirect(url_for('login'))
-    return render_template('teacher.html', tasks=[])
+    if session.get('role') != 'teacher': return redirect(url_for('login'))
+    
+    # Мұғалімsubmissions тізіміндегі барлық жұмысты көреді
+    # HTML-дегі {% for task, user in tasks %} цикліне сәйкес форматтаймыз
+    formatted_tasks = []
+    for s in submissions:
+        # (Тапсырма мәліметі, Студент мәліметі)
+        formatted_tasks.append((s, {"username": s['student_name']}))
+        
+    return render_template('teacher.html', tasks=formatted_tasks)
 
 @app.route('/logout')
 def logout():
@@ -78,5 +80,4 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(debug=True)
