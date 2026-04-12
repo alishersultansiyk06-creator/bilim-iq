@@ -3,184 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bilim IQ | Оқытушы Порталы</title>
+    <title>Bilim IQ | Студент Порталы</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --bg: #0d1117;
-            --glass: rgba(255, 255, 255, 0.05);
+            --bg: #090A0F;
+            --glass: rgba(255, 255, 255, 0.07);
             --border: rgba(255, 255, 255, 0.1);
             --accent: #00d2ff;
+            --secondary: #9b59b6;
         }
         body {
-            margin: 0; padding: 20px; background: var(--bg);
+            margin: 0; padding: 20px;
+            background: radial-gradient(circle at top, #1B2735 0%, #090A0F 100%);
             color: white; font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
         }
         .dashboard {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            grid-auto-rows: minmax(180px, auto);
+            grid-auto-rows: minmax(200px, auto);
             gap: 20px; max-width: 1200px; margin: auto;
         }
 
+        /* Плиткалар */
         .tile {
             background: var(--glass);
-            backdrop-filter: blur(15px);
-            border-radius: 20px;
-            padding: 20px;
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 25px;
             border: 1px solid var(--border);
-            transition: 0.3s;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex; flex-direction: column; justify-content: space-between;
             position: relative; overflow: hidden;
         }
-        .tile:hover { transform: translateY(-5px); border-color: var(--accent); }
-        .tile i { font-size: 2rem; opacity: 0.2; position: absolute; right: 20px; top: 20px; }
-        .tile h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #aaa; }
-        .tile .content { font-size: 1.2rem; font-weight: bold; }
+        .tile:hover { 
+            transform: translateY(-10px); 
+            border-color: var(--accent);
+            box-shadow: 0 10px 30px rgba(0, 210, 255, 0.2);
+        }
+        .tile i { font-size: 2.5rem; opacity: 0.15; position: absolute; right: 20px; top: 20px; }
+        .tile h3 { margin: 0 0 15px 0; font-size: 1.2rem; letter-spacing: 1px; }
 
         .wide { grid-column: span 2; }
 
-        .task-row {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 0; border-bottom: 1px solid var(--border);
+        /* Файл жүктеу өрістері */
+        .upload-box input[type="text"] {
+            width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 12px;
+            border: 1px solid var(--border); background: rgba(0,0,0,0.4); color: white; outline: none;
+            box-sizing: border-box;
         }
-        .btn-mini {
-            background: var(--accent); border: none; padding: 5px 12px;
-            border-radius: 5px; cursor: pointer; font-weight: bold; color: #000;
+        .file-input {
+            width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 12px;
+            border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white; cursor: pointer;
+            box-sizing: border-box;
         }
-
-        .post-input-file {
-            width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 8px;
-            border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white;
-            box-sizing: border-box; outline: none; cursor: pointer;
-        }
-        .post-input-file::file-selector-button {
-            background: var(--accent); border: none; padding: 4px 10px;
-            border-radius: 4px; color: #000; font-weight: bold; margin-right: 10px;
-            cursor: pointer;
+        .file-input::file-selector-button {
+            background: var(--accent); border: none; padding: 5px 15px;
+            border-radius: 8px; color: #000; font-weight: bold; cursor: pointer; margin-right: 10px;
         }
 
-        .grade-input {
-            width: 50px; background: rgba(0,0,0,0.5); border: 1px solid var(--border);
-            color: white; text-align: center; border-radius: 4px; padding: 4px;
+        .btn-send {
+            background: var(--accent); border: none; padding: 12px 25px;
+            border-radius: 12px; color: #000; font-weight: bold; cursor: pointer; transition: 0.3s;
+            text-decoration: none; display: inline-block; text-align: center;
         }
+        .btn-send:hover { opacity: 0.8; transform: scale(1.02); }
 
-        .post-input, .post-textarea {
-            width: 100%; padding: 10px; margin-bottom: 8px; border-radius: 8px;
-            border: 1px solid var(--border); background: rgba(0,0,0,0.3); color: white;
-            box-sizing: border-box; outline: none;
+        .grade-item {
+            display: flex; justify-content: space-between; padding: 10px 0;
+            border-bottom: 1px solid var(--border); font-size: 0.9rem;
         }
-        .post-textarea { height: 60px; font-family: inherit; }
 
         header {
-            max-width: 1200px; margin: 0 auto 30px;
+            max-width: 1200px; margin: 0 auto 40px;
             display: flex; justify-content: space-between; align-items: center;
         }
+        .user-badge {
+            background: var(--glass); padding: 10px 20px; border-radius: 50px;
+            border: 1px solid var(--border); display: flex; align-items: center; gap: 10px;
+        }
+
+        .task-scroll { max-height: 250px; overflow-y: auto; padding-right: 10px; }
+        .task-scroll::-webkit-scrollbar { width: 5px; }
+        .task-scroll::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
     </style>
 </head>
 <body>
 
 <header>
     <div>
-        <h1 style="margin:0; color:var(--accent);">Bilim IQ</h1>
-        <small>Оқытушы: {{ session.username }}</small>
+        <h1 style="margin:0; font-size: 2rem;">Bilim <span style="color:var(--accent);">IQ</span></h1>
+        <div style="opacity: 0.6; font-size: 0.8rem;">Студент порталы</div>
     </div>
-    <a href="/logout" style="color: #ff4d4d; text-decoration: none; font-weight: bold;">Шығу <i class="fa-solid fa-right-from-bracket"></i></a>
+    <div class="user-badge">
+        <i class="fa-solid fa-user-graduate" style="color:var(--accent);"></i>
+        <span>{{ session.username }}</span>
+        <a href="/logout" style="color:#ff4d4d; text-decoration:none; margin-left:15px;" title="Шығу">
+            <i class="fa-solid fa-power-off"></i>
+        </a>
+    </div>
 </header>
 
 <div class="dashboard">
-    <div class="tile wide" style="background: linear-gradient(45deg, rgba(155, 89, 182, 0.1), transparent);">
-        <i class="fa-solid fa-cloud-arrow-up"></i>
-        <h3 style="margin-bottom: 15px;">Жаңа тапсырма жариялау</h3>
-        
-        <form action="/post_task" method="POST" enctype="multipart/form-data">
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <input type="text" name="subject" class="post-input" style="flex: 1;" placeholder="Пән атауы" required>
-                <div style="flex: 1;">
-                    <input type="file" name="file" class="post-input-file" required>
-                </div>
-            </div>
-            <textarea name="desc" class="post-textarea" placeholder="Тапсырма сипаттамасы мен мерзімі..." required></textarea>
-            <button type="submit" class="btn-mini">Жариялау</button>
-        </form>
-    </div>
-
-    <div class="tile wide" style="background: linear-gradient(45deg, rgba(0,210,255,0.1), transparent);">
-        <i class="fa-solid fa-list-check"></i>
-        <h3>Тексеру және бақылау</h3>
-        <div class="task-list" style="max-height: 250px; overflow-y: auto; padding-right: 10px;">
-            {% for task, user in tasks %}
-            <div class="task-row">
-                <div style="display: flex; flex-direction: column;">
-                    <span style="font-weight: bold;">{{ user.username }}</span>
-                    <small style="opacity: 0.7;">{{ task.title }}</small>
-                </div>
-                
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <a href="{{ url_for('static', filename='uploads/' + task.file_url) }}" target="_blank" style="color:var(--accent); text-decoration: none; font-size: 0.9rem;">
-                        <i class="fa-solid fa-file-pdf"></i> Файлды көру
+    <div class="tile wide" style="background: rgba(0, 210, 255, 0.05);">
+        <i class="fa-solid fa-chalkboard-user"></i>
+        <h3>Оқытушылардан тапсырмалар</h3>
+        <div class="task-scroll">
+            {% for t_task in teacher_tasks %}
+            <div style="padding: 15px; border: 1px solid var(--border); border-radius: 15px; margin-bottom: 10px; background: rgba(255,255,255,0.02);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <strong style="color: var(--accent); font-size: 1.1rem;">{{ t_task.subject }}</strong>
+                        <p style="font-size: 0.9rem; opacity: 0.8; margin: 8px 0;">{{ t_task.description }}</p>
+                    </div>
+                    {% if t_task.file_url %}
+                    <a href="{{ url_for('static', filename='uploads/' + t_task.file_url) }}" target="_blank" class="btn-send" style="padding: 6px 15px; font-size: 0.75rem;">
+                        <i class="fa-solid fa-download"></i> Көру
                     </a>
-                    
-                    <form action="/grade_task/{{ task.id }}" method="POST" style="display: flex; gap: 5px;">
-                        <input type="text" name="grade" class="grade-input" value="{{ task.grade if task.grade else '' }}" placeholder="0">
-                        <button type="submit" class="btn-mini">OK</button>
-                    </form>
+                    {% endif %}
                 </div>
             </div>
             {% endfor %}
-            {% if not tasks %}
-            <p style="opacity: 0.5; font-size: 0.9rem; text-align: center; padding: 20px;">Әзірге жіберілген жұмыстар жоқ.</p>
+            {% if not teacher_tasks %}
+            <p style="opacity: 0.5; text-align: center; font-size: 0.9rem; padding: 20px;">Жаңа тапсырмалар әзірге жоқ.</p>
             {% endif %}
         </div>
     </div>
 
-    <div class="tile" style="background: rgba(52, 152, 219, 0.1);">
-        <i class="fa-solid fa-calendar-days"></i>
-        <h3>Сабақ кестесі</h3>
-        <div class="content">Келесі сабақ: 14:30<br><small>Аудитория: 402</small></div>
-        <button class="btn-mini">Ашу</button>
+    <div class="tile wide">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+        <h3>Тапсырманы жіберу</h3>
+        <form action="/upload_task" method="POST" enctype="multipart/form-data" class="upload-box">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <input type="text" name="title" placeholder="Тапсырма тақырыбы (мысалы: №1 Зертханалық)" required>
+                <input type="file" name="file" class="file-input" required>
+            </div>
+            <button type="submit" class="btn-send">
+                <i class="fa-solid fa-paper-plane"></i> Жұмысты жүктеу
+            </button>
+        </form>
+        <small style="opacity: 0.5; font-size: 0.7rem; margin-top: 10px;">* Рұқсат етілген: PDF, DOCX, ZIP, PNG, JPG.</small>
     </div>
 
-    <div class="tile">
-        <i class="fa-solid fa-users"></i>
-        <h3>Студенттер</h3>
-        <div class="content">25 белсенді</div>
-        <button class="btn-mini">Тізім</button>
+    <div class="tile" style="background: rgba(46, 204, 113, 0.05);">
+        <i class="fa-solid fa-star"></i>
+        <h3>Менің бағаларым</h3>
+        <div class="task-scroll" style="max-height: 150px;">
+            {% for task in tasks %}
+            <div class="grade-item">
+                <span>{{ task.title }}</span>
+                <span style="color: {{ '#2ecc71' if task.grade else '#00d2ff' }}; font-weight: bold;">
+                    {{ task.grade if task.grade else 'Тексерілуде' }}
+                </span>
+            </div>
+            {% endfor %}
+            {% if not tasks %}
+            <p style="font-size: 0.8rem; opacity: 0.5; text-align: center;">Жіберілген жұмыстар жоқ.</p>
+            {% endif %}
+        </div>
     </div>
 
-    <div class="tile wide" style="background: rgba(46, 204, 113, 0.1);">
-        <i class="fa-solid fa-bullhorn"></i>
-        <h3>Хабарламалар</h3>
-        <p style="font-size: 0.9rem; margin: 5px 0;">• Конференцияға тіркелу басталды.<br>• Жаңа оқу бағдарламасы бекітілді.</p>
-        <button class="btn-mini">Толығырақ</button>
+    <div class="tile" style="background: rgba(155, 89, 182, 0.05);">
+        <i class="fa-solid fa-calendar-check"></i>
+        <h3>Бүгінгі кесте</h3>
+        <div style="font-size: 0.9rem;">
+            <p style="margin: 5px 0;">• 09:00 - Сандық әдістер (402)</p>
+            <p style="margin: 5px 0;">• 11:30 - Web дайындау (305)</p>
+        </div>
+        <button class="btn-send" style="padding: 6px 15px; font-size: 0.8rem;">Кестені ашу</button>
     </div>
 
-    <div class="tile">
-        <i class="fa-solid fa-chart-line"></i>
-        <h3>Үлгерім</h3>
-        <div class="content" style="color: #2ecc71;">88.5%</div>
-        <small>Орташа көрсеткіш</small>
-    </div>
-
-    <div class="tile">
-        <i class="fa-solid fa-book"></i>
-        <h3>Кітапхана</h3>
-        <div class="content">12 жаңа материал</div>
-        <button class="btn-mini">Өту</button>
-    </div>
-
-    <div class="tile">
-        <i class="fa-solid fa-video"></i>
-        <h3>Курстар</h3>
-        <div class="content">4 жарияланды</div>
-        <button class="btn-mini">Басқару</button>
-    </div>
-
-    <div class="tile">
-        <i class="fa-solid fa-envelope-open-text"></i>
-        <h3>Сұраныстар</h3>
-        <div class="content">2 жаңа хат</div>
-        <button class="btn-mini">Көру</button>
+    <div class="tile" style="background: var(--secondary); border: none;">
+        <i class="fa-solid fa-graduation-cap" style="opacity: 0.3;"></i>
+        <h3 style="color: white;">Online Курс</h3>
+        <div style="font-weight: bold; font-size: 0.9rem;">Python & AI негіздері</div>
+        <div style="margin-top: 10px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.7rem; margin-bottom: 5px;">
+                <span>Прогресс</span>
+                <span>30%</span>
+            </div>
+            <div style="width: 100%; height: 6px; background: rgba(0,0,0,0.2); border-radius: 10px;">
+                <div style="width: 30%; height: 100%; background: white; border-radius: 10px;"></div>
+            </div>
+        </div>
     </div>
 </div>
 
