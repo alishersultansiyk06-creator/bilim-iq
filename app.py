@@ -8,12 +8,12 @@ app.secret_key = 'bilim_iq_2026'
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Папка жоқ болса, оны автоматты түрде жасау
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-# Мәліметтер базасының орнына уақытша тізім
-submissions = []
+# Мәліметтер базасының орнына уақытша тізімдер
+submissions = [] # Студенттердің жұмыстары
+teacher_tasks_list = [] # Мұғалімнің жариялаған тапсырмалары
 
 @app.route('/')
 def index():
@@ -34,25 +34,41 @@ def login():
         return redirect(url_for('index'))
     return render_template('login.html')
 
+# --- МҰҒАЛІМНІҢ ТАПСЫРМА ЖАРИЯЛАУЫ (ОСЫ ЖЕР ЖЕТІСПЕЙ ТҰРҒАН ЕДІ) ---
+@app.route('/post_task', methods=['POST'])
+def post_task():
+    if session.get('role') != 'teacher': return redirect(url_for('login'))
+    
+    subject = request.form.get('subject')
+    desc = request.form.get('desc')
+    file = request.files.get('file')
+    
+    if subject and file:
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        file.save(file_path)
+        
+        # Мұғалімнің тізіміне қосамыз
+        teacher_tasks_list.append({
+            "subject": subject,
+            "description": desc,
+            "file_url": file.filename
+        })
+    return redirect(url_for('teacher_dashboard'))
+
 # --- СТУДЕНТТІҢ ФАЙЛ ЖҮКТЕУІ ---
 @app.route('/upload_task', methods=['POST'])
 def upload_task():
     if 'username' not in session: return redirect(url_for('login'))
-    
     title = request.form.get('title')
     file = request.files.get('file')
-    
     if title and file:
-        # Файлды static/uploads папкасына сақтау
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
         file.save(file_path)
-        
-        # Тізімге ақпаратты қосу
         submissions.append({
             "id": len(submissions) + 1,
             "title": title,
             "student_name": session['username'],
-            "file_url": file.filename, # Бұл HTML-дегі файлды ашу үшін керек
+            "file_url": file.filename,
             "grade": None
         })
     return redirect(url_for('student_dashboard'))
@@ -61,21 +77,18 @@ def upload_task():
 @app.route('/grade_task/<int:task_id>', methods=['POST'])
 def grade_task(task_id):
     if session.get('role') != 'teacher': return redirect(url_for('login'))
-    
     grade_value = request.form.get('grade')
-    
-    # Тізімнен керекті тапсырманы тауып, бағасын жаңарту
     for s in submissions:
         if s['id'] == task_id:
             s['grade'] = grade_value
             break
-            
     return redirect(url_for('teacher_dashboard'))
 
 @app.route('/student_dashboard')
 def student_dashboard():
     my_tasks = [s for s in submissions if s['student_name'] == session['username']]
-    return render_template('student.html', teacher_tasks=[], tasks=my_tasks)
+    # teacher_tasks_list-ті студентке жіберуді ұмытпаймыз
+    return render_template('student.html', teacher_tasks=teacher_tasks_list, tasks=my_tasks)
 
 @app.route('/teacher_dashboard')
 def teacher_dashboard():
