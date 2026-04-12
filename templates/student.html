@@ -89,6 +89,25 @@
 </header>
 
 <div class="dashboard">
+    <div class="tile wide" style="background: rgba(0, 210, 255, 0.05);">
+        <i class="fa-solid fa-chalkboard-user"></i>
+        <h3>Оқытушылардан тапсырмалар</h3>
+        <div style="max-height: 200px; overflow-y: auto;">
+            {% for t_task in teacher_tasks %}
+            <div style="padding: 15px; border-bottom: 1px solid var(--border); margin-bottom: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <strong style="color: var(--accent);">{{ t_task.subject }}</strong>
+                    <a href="{{ t_task.file_url }}" target="_blank" class="btn-send" style="padding: 5px 12px; font-size: 0.8rem; text-decoration: none;">Материалды ашу</a>
+                </div>
+                <p style="font-size: 0.9rem; opacity: 0.8; margin: 10px 0;">{{ t_task.description }}</p>
+            </div>
+            {% endfor %}
+            {% if not teacher_tasks %}
+            <p style="opacity: 0.5; text-align: center; font-size: 0.9rem;">Әзірге жаңа тапсырмалар жоқ.</p>
+            {% endif %}
+        </div>
+    </div>
+
     <div class="tile wide">
         <i class="fa-solid fa-cloud-arrow-up"></i>
         <h3>Тапсырмаларды жіберу</h3>
