@@ -26,11 +26,14 @@ def login():
     if request.method == 'POST':
         user = request.form.get('username')
         if user == 'admin':
-            # Мұнда 'Оқытушы' сөзін '' деп ауыстырдық
             session['username'] = 'Биғалиева Венера'
             session['role'] = 'teacher'
         else:
-            session['username'] = user
+            # Студент үшін тексеріс қосамыз
+            if user == 'student':
+                session['username'] = 'Сұлтансиық Әлішер'
+            else:
+                session['username'] = user
             session['role'] = 'student'
         return redirect(url_for('index'))
     return render_template('login.html')
