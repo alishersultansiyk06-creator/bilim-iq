@@ -45,18 +45,16 @@
         .tile i { font-size: 2.5rem; opacity: 0.15; position: absolute; right: 20px; top: 20px; }
         .tile h3 { margin: 0 0 15px 0; font-size: 1.2rem; letter-spacing: 1px; }
 
-        .wide { grid-column: span 2; }
+        .wide { grid-column: span 2; background: linear-gradient(135deg, rgba(0,210,255,0.1), transparent); }
 
         /* Файл жүктеу өрістері */
         .upload-box input[type="text"] {
             width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 12px;
             border: 1px solid var(--border); background: rgba(0,0,0,0.4); color: white; outline: none;
-            box-sizing: border-box;
         }
         .file-input {
             width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 12px;
             border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white; cursor: pointer;
-            box-sizing: border-box;
         }
         .file-input::file-selector-button {
             background: var(--accent); border: none; padding: 5px 15px;
@@ -119,7 +117,7 @@
                     </div>
                     {% if t_task.file_url %}
                     <a href="{{ url_for('static', filename='uploads/' + t_task.file_url) }}" target="_blank" class="btn-send" style="padding: 6px 15px; font-size: 0.75rem;">
-                        <i class="fa-solid fa-download"></i> Көру
+                        <i class="fa-solid fa-download"></i> Жүктеу
                     </a>
                     {% endif %}
                 </div>
@@ -143,7 +141,7 @@
                 <i class="fa-solid fa-paper-plane"></i> Жұмысты жүктеу
             </button>
         </form>
-        <small style="opacity: 0.5; font-size: 0.7rem; margin-top: 10px;">* Рұқсат етілген: PDF, DOCX, ZIP, PNG, JPG.</small>
+        <small style="opacity: 0.5; font-size: 0.7rem; margin-top: 10px;">* Файл форматы: PDF, DOCX, ZIP немесе сурет.</small>
     </div>
 
     <div class="tile" style="background: rgba(46, 204, 113, 0.05);">
@@ -153,7 +151,7 @@
             {% for task in tasks %}
             <div class="grade-item">
                 <span>{{ task.title }}</span>
-                <span style="color: {{ '#2ecc71' if task.grade else '#00d2ff' }}; font-weight: bold;">
+                <span style="color: {{ '#2ecc71' if task.grade else 'var(--accent)' }}; font-weight: bold;">
                     {{ task.grade if task.grade else 'Тексерілуде' }}
                 </span>
             </div>
@@ -174,6 +172,26 @@
         <button class="btn-send" style="padding: 6px 15px; font-size: 0.8rem;">Кестені ашу</button>
     </div>
 
+    <div class="tile" style="background: rgba(230, 126, 34, 0.05);">
+        <i class="fa-solid fa-vial"></i>
+        <h3>Белсенді тесттер</h3>
+        <div style="font-size: 0.9rem; opacity: 0.7;">2 жаңа тест қолжетімді.</div>
+        <button class="btn-send" style="padding: 6px 15px; font-size: 0.8rem; background: #e67e22;">Тесттен өту</button>
+    </div>
+
+    <div class="tile">
+        <i class="fa-solid fa-book-atlas"></i>
+        <h3>Кітапхана</h3>
+        <div style="font-size: 0.9rem;">Python, Flask бойынша материалдар.</div>
+        <button class="btn-send" style="padding: 6px 15px; font-size: 0.8rem;">Материалдар</button>
+    </div>
+
+    <div class="tile wide" style="background: rgba(52, 152, 219, 0.05);">
+        <i class="fa-solid fa-bolt"></i>
+        <h3>Жаңалықтар</h3>
+        <p style="font-size: 0.9rem; line-height: 1.5;">• IT-хакатонға тіркелу басталды.<br>• Жатақханаға өтініш беру мерзімі 20-сына дейін.</p>
+    </div>
+
     <div class="tile" style="background: var(--secondary); border: none;">
         <i class="fa-solid fa-graduation-cap" style="opacity: 0.3;"></i>
         <h3 style="color: white;">Online Курс</h3>
@@ -187,6 +205,13 @@
                 <div style="width: 30%; height: 100%; background: white; border-radius: 10px;"></div>
             </div>
         </div>
+    </div>
+
+    <div class="tile">
+        <i class="fa-solid fa-file-invoice"></i>
+        <h3>Қызметтер</h3>
+        <div style="font-size: 0.9rem;">Анықтама алуға сұраныс беру.</div>
+        <button class="btn-send" style="padding: 6px 15px; font-size: 0.8rem;">Сұраныс беру</button>
     </div>
 </div>
 
