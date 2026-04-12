@@ -218,4 +218,4 @@ def logout():
 
 if __name__ == '__main__':
 
-    app.run(debug=True) бұл кодты өзгертпей жасап берші
+    app.run(debug=True)
