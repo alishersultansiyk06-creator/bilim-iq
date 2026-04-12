@@ -50,12 +50,22 @@
             background: var(--accent); border: none; padding: 5px 10px;
             border-radius: 5px; cursor: pointer; font-weight: bold;
         }
-        .btn-drive {
-            background: #ffffff20; border: 1px solid var(--border); color: #fff;
-            padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.8rem;
-            text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+
+        /* Файл таңдау батырмасының стилі */
+        .file-upload-wrapper {
+            position: relative;
+            width: 100%;
         }
-        .btn-drive:hover { background: #34a853; border-color: #34a853; }
+        .post-input-file {
+            width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 8px;
+            border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white;
+            box-sizing: border-box; outline: none; cursor: pointer;
+        }
+        .post-input-file::file-selector-button {
+            background: var(--accent); border: none; padding: 4px 10px;
+            border-radius: 4px; color: #000; font-weight: bold; margin-right: 10px;
+            cursor: pointer;
+        }
 
         .grade-input {
             width: 40px; background: rgba(0,0,0,0.5); border: 1px solid var(--border);
@@ -91,22 +101,19 @@
 
 <div class="dashboard">
     <div class="tile wide" style="background: linear-gradient(45deg, rgba(155, 89, 182, 0.1), transparent);">
-        <i class="fa-solid fa-file-circle-plus"></i>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h3 style="margin:0;">Жаңа материал (Word, PPT, PDF)</h3>
-            <a href="https://drive.google.com" target="_blank" class="btn-drive">
-                <i class="fa-brands fa-google-drive" style="position:static; font-size:1rem; opacity:1;"></i> Файл жүктеу (Drive)
-            </a>
-        </div>
-        <form action="/post_task" method="POST">
-            <div style="display: flex; gap: 10px;">
-                <input type="text" name="subject" class="post-input" placeholder="Пән және материал түрі (мысалы: IT - Презентация)" required>
-                <input type="url" name="url" class="post-input" placeholder="Google Drive сілтемесін (Word/PPT) қойыңыз" required>
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+        <h3 style="margin-bottom: 15px;">Жаңа тапсырма жүктеу</h3>
+        
+        <form action="/post_task" method="POST" enctype="multipart/form-data">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <input type="text" name="subject" class="post-input" style="flex: 1;" placeholder="Пән атауы (мысалы: IT)" required>
+                <div style="flex: 1;">
+                    <input type="file" name="file" class="post-input-file" required>
+                </div>
             </div>
-            <textarea name="desc" class="post-textarea" placeholder="Материал туралы қысқаша мәлімет немесе орындау мерзімі..." required></textarea>
+            <textarea name="desc" class="post-textarea" placeholder="Тапсырма сипаттамасы мен орындау мерзімі..." required></textarea>
             <button type="submit" class="btn-mini">Жариялау</button>
         </form>
-        <small style="opacity: 0.5; font-size: 0.7rem; margin-top: 5px;">* Drive-қа файлды жүктеп, "Доступ: Все, у кого есть ссылка" жасауды ұмытпаңыз.</small>
     </div>
 
     <div class="tile wide" style="background: linear-gradient(45deg, rgba(0,210,255,0.1), transparent);">
@@ -117,7 +124,7 @@
             <div class="task-row">
                 <span>{{ user.username }} - {{ task.title }}</span>
                 <form action="/grade_task/{{ task.id }}" method="POST">
-                    <a href="{{ task.file_url }}" target="_blank" style="color:var(--accent); margin-right:10px;">Ашу</a>
+                    <a href="{{ task.file_url }}" target="_blank" style="color:var(--accent); margin-right:10px;">Файлды көру</a>
                     <input type="text" name="grade" class="grade-input" value="{{ task.grade if task.grade else '' }}">
                     <button type="submit" class="btn-mini">OK</button>
                 </form>
