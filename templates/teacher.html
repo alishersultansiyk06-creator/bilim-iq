@@ -39,10 +39,9 @@
         .tile h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #aaa; }
         .tile .content { font-size: 1.2rem; font-weight: bold; }
 
-        /* Арнайы блоктар (Үлкенірек) */
         .wide { grid-column: span 2; }
 
-        /* Бағалау кестесі */
+        /* Тапсырмалар кестесі */
         .task-row {
             display: flex; justify-content: space-between; align-items: center;
             padding: 8px 0; border-bottom: 1px solid var(--border);
@@ -51,12 +50,18 @@
             background: var(--accent); border: none; padding: 5px 10px;
             border-radius: 5px; cursor: pointer; font-weight: bold;
         }
+        .btn-drive {
+            background: #ffffff20; border: 1px solid var(--border); color: #fff;
+            padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.8rem;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+        }
+        .btn-drive:hover { background: #34a853; border-color: #34a853; }
+
         .grade-input {
             width: 40px; background: rgba(0,0,0,0.5); border: 1px solid var(--border);
             color: white; text-align: center; border-radius: 4px;
         }
 
-        /* Жаңа тапсырма формасының стилі */
         .post-input {
             width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 8px;
             border: 1px solid var(--border); background: rgba(0,0,0,0.3); color: white;
@@ -68,7 +73,6 @@
             box-sizing: border-box; outline: none; margin-bottom: 8px; font-family: inherit;
         }
 
-        /* Header */
         header {
             max-width: 1200px; margin: 0 auto 30px;
             display: flex; justify-content: space-between; align-items: center;
@@ -88,11 +92,16 @@
 <div class="dashboard">
     <div class="tile wide" style="background: linear-gradient(45deg, rgba(155, 89, 182, 0.1), transparent);">
         <i class="fa-solid fa-file-circle-plus"></i>
-        <h3>Жаңа тапсырма жариялау</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3 style="margin:0;">Жаңа тапсырма жариялау</h3>
+            <a href="https://drive.google.com" target="_blank" class="btn-drive">
+                <i class="fa-brands fa-google-drive" style="position:static; font-size:1rem; opacity:1;"></i> Drive-қа өту
+            </a>
+        </div>
         <form action="/post_task" method="POST">
             <div style="display: flex; gap: 10px;">
                 <input type="text" name="subject" class="post-input" placeholder="Пән атауы (мысалы: IT)" required>
-                <input type="url" name="url" class="post-input" placeholder="Материалға сілтеме (Drive)" required>
+                <input type="url" name="url" class="post-input" placeholder="Google Drive сілтемесін қойыңыз" required>
             </div>
             <textarea name="desc" class="post-textarea" placeholder="Тапсырма сипаттамасы мен орындау мерзімі..." required></textarea>
             <button type="submit" class="btn-mini">Жариялау</button>
