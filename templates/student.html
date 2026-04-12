@@ -3,113 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bilim IQ | Студент Панелі</title>
+    <title>Bilim IQ | Студент Порталы</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --card-bg: rgba(255, 255, 255, 0.1);
-            --text-color: #ffffff;
+            --bg: #090A0F;
+            --glass: rgba(255, 255, 255, 0.07);
+            --border: rgba(255, 255, 255, 0.1);
             --accent: #00d2ff;
+            --secondary: #9b59b6;
         }
         body {
             margin: 0; padding: 20px;
             background: radial-gradient(circle at top, #1B2735 0%, #090A0F 100%);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: var(--text-color);
+            color: white; font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
         }
-        .header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 20px; background: var(--card-bg); backdrop-filter: blur(10px);
-            border-radius: 15px; margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.1);
-        }
-        .user-info { display: flex; align-items: center; gap: 15px; }
-        .avatar { width: 45px; height: 45px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-
-        /* Плиткалар торы */
-        .grid-container {
+        .dashboard {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-        }
-        .card {
-            background: var(--card-bg); backdrop-filter: blur(15px);
-            border-radius: 20px; padding: 25px;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: 0.3s transform ease;
-            position: relative; overflow: hidden;
-            min-height: 180px; display: flex; flex-direction: column; justify-content: space-between;
-        }
-        .card:hover { transform: translateY(-10px); background: rgba(255,255,255,0.15); }
-        .card h3 { margin: 0; font-size: 1.4rem; z-index: 2; }
-        
-        /* Батырмалар */
-        .btn-open {
-            background: var(--accent); border: none; padding: 10px 20px;
-            border-radius: 10px; color: #000; font-weight: bold; cursor: pointer;
-            width: fit-content; text-decoration: none; text-align: center;
-        }
-        
-        /* Тапсырма жіберу формасы плитка ішінде */
-        .upload-form input {
-            width: 100%; padding: 8px; margin: 5px 0; border-radius: 8px;
-            border: none; background: rgba(0,0,0,0.3); color: white;
+            grid-auto-rows: minmax(200px, auto);
+            gap: 20px; max-width: 1200px; margin: auto;
         }
 
-        /* Түстер (плиткаларға әртүрлі түс беру) */
-        .blue { border-left: 5px solid #3498db; }
-        .green { border-left: 5px solid #2ecc71; }
-        .orange { border-left: 5px solid #e67e22; }
-        .purple { border-left: 5px solid #9b59b6; }
+        /* Плиткалар (Cards) */
+        .tile {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 25px;
+            border: 1px solid var(--border);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; flex-direction: column; justify-content: space-between;
+            position: relative; overflow: hidden;
+        }
+        .tile:hover { 
+            transform: translateY(-10px); 
+            border-color: var(--accent);
+            box-shadow: 0 10px 30px rgba(0, 210, 255, 0.2);
+        }
+        .tile i { font-size: 2.5rem; opacity: 0.15; position: absolute; right: 20px; top: 20px; }
+        .tile h3 { margin: 0 0 15px 0; font-size: 1.2rem; letter-spacing: 1px; }
+
+        /* Тапсырма жіберу бөлімі (Wide) */
+        .wide { grid-column: span 2; background: linear-gradient(135deg, rgba(0,210,255,0.1), transparent); }
+        .upload-box input {
+            width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 12px;
+            border: 1px solid var(--border); background: rgba(0,0,0,0.4); color: white; outline: none;
+        }
+        .btn-send {
+            background: var(--accent); border: none; padding: 12px 25px;
+            border-radius: 12px; color: #000; font-weight: bold; cursor: pointer; transition: 0.3s;
+        }
+        .btn-send:hover { opacity: 0.8; transform: scale(1.05); }
+
+        /* Бағалар тізімі */
+        .grade-item {
+            display: flex; justify-content: space-between; padding: 8px 0;
+            border-bottom: 1px solid var(--border); font-size: 0.9rem;
+        }
+
+        /* Header */
+        header {
+            max-width: 1200px; margin: 0 auto 40px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .user-badge {
+            background: var(--glass); padding: 10px 20px; border-radius: 50px;
+            border: 1px solid var(--border); display: flex; align-items: center; gap: 10px;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <div class="user-info">
-            <div class="avatar">ӘС</div>
-            <div>
-                <div style="font-size: 0.8rem; opacity: 0.7;">Студент:</div>
-                <div style="font-weight: bold;">{{ session.username }}</div>
+<header>
+    <div>
+        <h1 style="margin:0; font-size: 2rem;">Bilim <span style="color:var(--accent);">IQ</span></h1>
+        <div style="opacity: 0.6; font-size: 0.8rem;">Студент порталы</div>
+    </div>
+    <div class="user-badge">
+        <i class="fa-solid fa-user-astronaut" style="color:var(--accent);"></i>
+        <span>{{ session.username }}</span>
+        <a href="/logout" style="color:#ff4d4d; text-decoration:none; margin-left:15px;"><i class="fa-solid fa-power-off"></i></a>
+    </div>
+</header>
+
+<div class="dashboard">
+    <div class="tile wide">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+        <h3>Тапсырмаларды жіберу</h3>
+        <form action="/upload_task" method="POST" class="upload-box">
+            <div style="display: flex; gap: 15px;">
+                <input type="text" name="title" placeholder="Тақырып (Лаб №1)" required>
+                <input type="url" name="url" placeholder="Google Drive немесе файл сілтемесі" required>
             </div>
-        </div>
-        <a href="/logout" style="color: #ff4d4d; text-decoration: none; font-weight: bold;">ШЫҒУ</a>
+            <button type="submit" class="btn-send">Жұмысты жіберу</button>
+        </form>
     </div>
 
-    <div class="grid-container">
-        <div class="card blue">
-            <h3>Тапсырмалар</h3>
-            <div class="upload-form">
-                <form action="/upload_task" method="POST">
-                    <input type="text" name="title" placeholder="Тақырып (Лаб 1)" required>
-                    <input type="url" name="url" placeholder="Drive сілтемесі" required>
-                    <button type="submit" class="btn-open" style="margin-top: 10px;">Жіберу</button>
-                </form>
+    <div class="tile" style="background: rgba(46, 204, 113, 0.05);">
+        <i class="fa-solid fa-star"></i>
+        <h3>Соңғы бағалар</h3>
+        <div style="max-height: 120px; overflow-y: auto;">
+            {% for task in tasks %}
+            <div class="grade-item">
+                <span>{{ task.title }}</span>
+                <span style="color: var(--accent); font-weight: bold;">{{ task.grade if task.grade else '...' }}</span>
             </div>
+            {% endfor %}
+            {% if not tasks %}
+            <p style="font-size: 0.8rem; opacity: 0.5;">Жіберілген жұмыс жоқ.</p>
+            {% endif %}
         </div>
+    </div>
 
-        <div class="card green">
-            <h3>Менің пәндерім (Бағалар)</h3>
-            <div style="max-height: 120px; overflow-y: auto; margin-top: 10px;">
-                {% for task in tasks %}
-                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding: 5px 0;">
-                    <span>{{ task.title }}</span>
-                    <span style="color: #00ffcc; font-weight: bold;">{{ task.grade if task.grade else '...' }}</span>
-                </div>
-                {% endfor %}
-            </div>
-            <a href="#" class="btn-open" style="margin-top: 10px;">Толығырақ</a>
+    <div class="tile" style="background: rgba(155, 89, 182, 0.05);">
+        <i class="fa-solid fa-calendar-check"></i>
+        <h3>Сабақ кестесі</h3>
+        <div style="font-size: 0.9rem;">
+            <p>• 09:00 - Сандық әдістер</p>
+            <p>• 11:30 - Web дайындау (Flask)</p>
         </div>
+        <button class="btn-send" style="padding: 5px 15px; font-size: 0.8rem;">Толық көру</button>
+    </div>
 
-        <div class="card orange">
-            <h3>Сабақ кестесі</h3>
-            <p style="opacity: 0.7; font-size: 0.9rem;">Бүгін: Дүйсенбі<br>1-пара: IT технологиялар</p>
-            <a href="#" class="btn-open">Ашу</a>
-        </div>
+    <div class="tile" style="background: rgba(230, 126, 34, 0.05);">
+        <i class="fa-solid fa-vial"></i>
+        <h3>Тестілеу</h3>
+        <div style="font-size: 0.9rem; opacity: 0.7;">Ағымдағы бақылау: 2 белсенді тест бар.</div>
+        <button class="btn-send" style="padding: 5px 15px; font-size: 0.8rem; background: #e67e22;">Ашу</button>
+    </div>
 
-        <div class="card purple">
-            <h3>Кітапхана</h3>
-            <p style="opacity: 0.7; font-size: 0.9rem;">245 жаңа кітап қосылды</p>
-            <a href="#" class="btn-open">Ашу</a>
+    <div class="tile">
+        <i class="fa-solid fa-book-atlas"></i>
+        <h3>Кітапхана</h3>
+        <div style="font-size: 0.9rem;">Сіздің мамандығыңыз бойынша 15 жаңа оқулық қосылды.</div>
+        <button class="btn-send" style="padding: 5px 15px; font-size: 0.8rem;">Кіру</button>
+    </div>
+
+    <div class="tile wide" style="background: rgba(52, 152, 219, 0.05);">
+        <i class="fa-solid fa-bolt"></i>
+        <h3>Университет жаңалықтары</h3>
+        <p style="font-size: 0.9rem;">• Ғылыми апталық аясында хакатондар басталды. Тіркеліп үлгеріңіз!<br>• Жатақханаға өтініш беру мерзімі 20-на дейін ұзартылды.</p>
+    </div>
+
+    <div class="tile">
+        <i class="fa-solid fa-file-invoice"></i>
+        <h3>Анықтамалар</h3>
+        <div style="font-size: 0.9rem;">Оқу орнынан анықтама алуға өтініш беру.</div>
+        <button class="btn-send" style="padding: 5px 15px; font-size: 0.8rem;">Сұраныс беру</button>
+    </div>
+
+    <div class="tile" style="background: var(--secondary); opacity: 0.9;">
+        <i class="fa-solid fa-graduation-cap" style="opacity: 0.3;"></i>
+        <h3>Online Bilim</h3>
+        <div style="font-weight: bold;">Python & AI курсы</div>
+        <p style="font-size: 0.8rem;">30% аяқталды</p>
+        <div style="width: 100%; height: 5px; background: rgba(0,0,0,0.3); border-radius: 5px;">
+            <div style="width: 30%; height: 100%; background: white; border-radius: 5px;"></div>
         </div>
     </div>
 </div>
