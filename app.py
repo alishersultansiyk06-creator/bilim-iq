@@ -12,8 +12,8 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 # 2. МӘЛІМЕТТЕР (Уақытша база)
 USERS = {
-    'admin': {'name': 'мен', 'role': 'teacher', 'route': 'teacher_dashboard'},
-    'student': {'name': 'Сұлтансиық Әлішер', 'role': 'student', 'route': 'student_dashboard'}
+    'admin': {'name': 'Teacher', 'role': 'teacher', 'route': 'teacher_dashboard'},
+    'student': {'name': 'Student', 'role': 'student', 'route': 'student_dashboard'}
 }
 
 submissions = []      # Студенттер жіберген файлдар
