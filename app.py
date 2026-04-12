@@ -26,22 +26,27 @@ def login():
     if request.method == 'POST':
         user = request.form.get('username')
         
-        # Мұғалімді тексеру
+        # Мұғалім үшін (Биғалиева Венера)
         if user == 'admin':
             session['username'] = 'Биғалиева Венера'
             session['role'] = 'teacher'
+            session['portal_name'] = 'Оқытушы порталы'
+            return redirect(url_for('teacher_dashboard'))
             
-        # Студентті тексеру
+        # Студент үшін (Сұлтансиық Әлішер)
         elif user == 'student':
             session['username'] = 'Сұлтансиық Әлішер'
             session['role'] = 'student'
+            session['portal_name'] = 'Студент порталы'
+            return redirect(url_for('student_dashboard'))
             
         # Басқа логиндер үшін
         else:
             session['username'] = user
             session['role'] = 'student'
+            session['portal_name'] = 'Студент порталы'
+            return redirect(url_for('student_dashboard'))
             
-        return redirect(url_for('index'))
     return render_template('login.html')
 
 # --- МҰҒАЛІМНІҢ ТАПСЫРМА ЖАРИЯЛАУЫ ---
