@@ -4,14 +4,15 @@ import os
 
 app = Flask(__name__)
 
-# 1. МАҢЫЗДЫ: Secret key-ді тұрақты қылу. 
-# Егер ол os.urandom(24) болса, сервер әр перезагрузкада сессияны өшіреді.
-app.secret_key = 'alisher_bilim_iq_2026_key' 
+# --- СЕССИЯНЫ ДҰРЫСТАУ ---
+# 1. Секреттік кілтті ешқашан os.urandom(24) қылма, өйткені сервер оянған сайын ол өзгереді.
+# Төмендегідей тұрақты мән бер:
+app.secret_key = 'bilim_iq_super_secret_key_2026' 
 
-# 2. Сессияның параметрлерін баптау
-app.permanent_session_lifetime = timedelta(days=7) # 7 күн бойы логиннен шықпайды
+# 2. Сессия браузерді жапса да сақталуы үшін:
+app.permanent_session_lifetime = timedelta(days=7)
 
-# Мысалы ретінде уақытша база (сенде SQLAlchemy болса, соны қолдан)
+# --- УАҚЫТША БАЗА (Сенің базаң болса, сонымен ауыстыр) ---
 users = {
     "admin": {"password": "123", "role": "teacher"},
     "student1": {"password": "123", "role": "student"}
@@ -31,9 +32,10 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         
-        # Пайдаланушыны тексеру
+        # Логин мен парольді тексеру
         if username in users and users[username]['password'] == password:
-            session.permanent = True  # Сессияны тұрақты қылу
+            session.clear() # Жаңадан кірерде ескі сессияны тазалау
+            session.permanent = True # Бұл өте маңызды!
             session['username'] = username
             session['role'] = users[username]['role']
             
@@ -41,31 +43,48 @@ def login():
                 return redirect(url_for('teacher_dashboard'))
             return redirect(url_for('student_dashboard'))
         else:
-            return "Қате логин немесе пароль!"
+            flash("Логин немесе пароль қате!", "danger")
             
-    return render_template('login.html') # Логин бетінің аты
+    return render_template('login.html')
 
 @app.route('/student_dashboard')
 def student_dashboard():
-    # ЕГЕР СЕССИЯ ЖОҚ БОЛСА - ЛОГИНГЕ ЖІБЕРУ
-    if 'username' not in session or session.get('role') != 'student':
+    # Тексеріс: Егер сессия жоқ болса, лақтырып жіберу
+    if 'username' not in session:
         return redirect(url_for('login'))
     
-    # Бұл жерде базадан тапсырмаларды аласың
-    return render_template('student.html')
+    if session.get('role') != 'student':
+        return "Бұл бетке кіруге рұқсатыңыз жоқ!"
+
+    # Студентке арналған тапсырмаларды осы жерде базадан аласың
+    # Мысалы: tasks = Task.query.all()
+    return render_template('student.html', teacher_tasks=[], tasks=[])
 
 @app.route('/teacher_dashboard')
 def teacher_dashboard():
-    # ЕГЕР СЕССИЯ ЖОҚ БОЛСА - ЛОГИНГЕ ЖІБЕРУ
-    if 'username' not in session or session.get('role') != 'teacher':
+    # Тексеріс: Егер сессия жоқ болса, лақтырып жіберу
+    if 'username' not in session:
         return redirect(url_for('login'))
-        
-    return render_template('teacher.html')
+    
+    if session.get('role') != 'teacher':
+        return "Бұл бетке кіруге рұқсатыңыз жоқ!"
+
+    return render_template('teacher.html', tasks=[])
+
+@app.route('/upload_task', methods=['POST'])
+def upload_task():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    # Файл жүктеу логикасы осы жерде...
+    flash("Жұмыс сәтті жіберілді!", "success")
+    return redirect(url_for('student_dashboard'))
 
 @app.route('/logout')
 def logout():
-    session.clear() # Сессияны толық тазалау
+    session.clear()
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Render немесе басқа хостингке арналған порт баптауы
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
