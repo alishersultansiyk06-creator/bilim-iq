@@ -25,16 +25,22 @@ def index():
 def login():
     if request.method == 'POST':
         user = request.form.get('username')
+        
+        # Мұғалімді тексеру
         if user == 'admin':
             session['username'] = 'Биғалиева Венера'
             session['role'] = 'teacher'
-        else:
-            # Студент үшін тексеріс қосамыз
-            if user == 'student':
-                session['username'] = 'Сұлтансиық Әлішер'
-            else:
-                session['username'] = user
+            
+        # Студентті тексеру
+        elif user == 'student':
+            session['username'] = 'Сұлтансиық Әлішер'
             session['role'] = 'student'
+            
+        # Басқа логиндер үшін
+        else:
+            session['username'] = user
+            session['role'] = 'student'
+            
         return redirect(url_for('index'))
     return render_template('login.html')
 
@@ -89,11 +95,13 @@ def grade_task(task_id):
 
 @app.route('/student_dashboard')
 def student_dashboard():
-    my_tasks = [s for s in submissions if s['student_name'] == session['username']]
+    # Тек осы студенттің жіберген жұмыстарын сүзгіден өткізу
+    my_tasks = [s for s in submissions if s['student_name'] == session.get('username')]
     return render_template('student.html', teacher_tasks=teacher_tasks_list, tasks=my_tasks)
 
 @app.route('/teacher_dashboard')
 def teacher_dashboard():
+    # Мұғалімге барлық студенттердің жұмысын көрсету
     formatted_tasks = [(s, {"username": s['student_name']}) for s in submissions]
     return render_template('teacher.html', tasks=formatted_tasks)
 
