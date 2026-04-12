@@ -1,38 +1,130 @@
 <!DOCTYPE html>
-<html>
+<html lang="kk">
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilim IQ | Мұғалім Панелі</title>
     <style>
-        body { background: #090A0F; color: white; font-family: sans-serif; margin: 0; padding: 20px; }
-        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border-radius: 20px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); max-width: 900px; margin: auto; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        input { background: rgba(255,255,255,0.1); border: none; color: white; padding: 5px; width: 40px; border-radius: 5px; }
-        button { background: #00ffcc; color: black; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        :root {
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --accent-blue: #3498db;
+            --accent-green: #2ecc71;
+            --accent-purple: #9b59b6;
+            --text: #ffffff;
+        }
+        body {
+            margin: 0; padding: 20px;
+            background: radial-gradient(circle at bottom, #1B2735 0%, #090A0F 100%);
+            font-family: 'Segoe UI', sans-serif; color: var(--text);
+            min-height: 100vh;
+        }
+        .container { max-width: 1000px; margin: auto; }
+        
+        /* Жоғарғы шапка */
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 25px; background: var(--card-bg); backdrop-filter: blur(15px);
+            border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 25px;
+        }
+        .user-profile { display: flex; align-items: center; gap: 12px; }
+        .avatar-circle { width: 40px; height: 40px; background: var(--accent-purple); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+        /* Плиткалар торы */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: var(--card-bg); backdrop-filter: blur(12px);
+            border-radius: 20px; padding: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: 0.3s;
+        }
+        .card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.12); }
+        .card h3 { margin-top: 0; font-size: 1.3rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+
+        /* Бағалау кестесі плитка ішінде */
+        .task-list { max-height: 300px; overflow-y: auto; }
+        .task-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .task-item a { color: #00d2ff; text-decoration: none; font-size: 0.9rem; }
+        
+        /* Баға қою формасы */
+        .grade-form { display: flex; gap: 8px; }
+        .grade-input { width: 45px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 5px; text-align: center; }
+        .btn-save { background: var(--accent-green); border: none; color: black; font-weight: bold; border-radius: 5px; cursor: pointer; padding: 2px 8px; }
+
+        /* Статистика блоктары */
+        .stat-val { font-size: 2rem; font-weight: bold; color: var(--accent-blue); }
+        .btn-action { display: inline-block; margin-top: 15px; padding: 8px 15px; background: rgba(255,255,255,0.1); border-radius: 8px; color: white; text-decoration: none; font-size: 0.9rem; }
+        .btn-action:hover { background: rgba(255,255,255,0.2); }
     </style>
 </head>
 <body>
-    <div class="glass">
-        <div style="display: flex; justify-content: space-between;">
-            <h2>Тексеру панелі</h2>
-            <a href="/logout" style="color: #ff4d4d; text-decoration: none;">Шығу</a>
+
+<div class="container">
+    <div class="header">
+        <div class="user-profile">
+            <div class="avatar-circle">M</div>
+            <div>
+                <div style="font-size: 0.75rem; opacity: 0.7;">Оқытушы:</div>
+                <div style="font-weight: bold;">{{ session.username }}</div>
+            </div>
         </div>
-        <table>
-            <tr><th>Студент</th><th>Тапсырма</th><th>Файл</th><th>Баға</th></tr>
-            {% for task, user in tasks %}
-            <tr>
-                <td>{{ user.username }}</td>
-                <td>{{ task.title }}</td>
-                <td><a href="{{ task.file_url }}" target="_blank" style="color: #00d2ff;">Ашу</a></td>
-                <td>
-                    <form action="/grade_task/{{ task.id }}" method="POST">
-                        <input type="text" name="grade" value="{{ task.grade if task.grade else '' }}">
-                        <button type="submit">OK</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </table>
+        <a href="/logout" style="color: #ff4d4d; text-decoration: none; font-weight: bold; font-size: 0.9rem;">ШЫҒУ</a>
     </div>
+
+    <div class="grid">
+        <div class="card" style="grid-column: span 2;">
+            <h3>Тексерілетін жұмыстар</h3>
+            <div class="task-list">
+                {% for task, user in tasks %}
+                <div class="task-item">
+                    <div>
+                        <div style="font-weight: bold;">{{ user.username }}</div>
+                        <div style="font-size: 0.8rem; opacity: 0.6;">{{ task.title }}</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <a href="{{ task.file_url }}" target="_blank">Файлды ашу</a>
+                        <form action="/grade_task/{{ task.id }}" method="POST" class="grade-form">
+                            <input type="text" name="grade" class="grade-input" value="{{ task.grade if task.grade else '' }}" placeholder="0">
+                            <button type="submit" class="btn-save">OK</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+                {% if not tasks %}
+                <p style="text-align: center; opacity: 0.5;">Әзірге тапсырмалар жоқ.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Статистика</h3>
+            <div style="margin-top: 15px;">
+                <div class="stat-val">85%</div>
+                <div style="font-size: 0.9rem; opacity: 0.7;">Орташа үлгерім</div>
+            </div>
+            <div style="margin-top: 15px;">
+                <div class="stat-val">{{ tasks|length }}</div>
+                <div style="font-size: 0.9rem; opacity: 0.7;">Жалпы тапсырмалар</div>
+            </div>
+            <a href="#" class="btn-action">Есепті ашу</a>
+        </div>
+
+        <div class="card">
+            <h3>Жаңалықтар</h3>
+            <div style="font-size: 0.9rem; margin-top: 10px;">
+                <p>• Сессия кестесі бекітілді.</p>
+                <p>• Лабораториялық жұмыстарды қабылдау мерзімі ұзартылды.</p>
+            </div>
+            <a href="#" class="btn-action">Барлық жаңалықтар</a>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
