@@ -1,26 +1,38 @@
 <!DOCTYPE html>
 <html>
-<head><title>Мұғалім</title></head>
-<body style="font-family: Arial; margin: 40px;">
-    <h2>Bilim IQ - Мұғалім панелі</h2>
-    <a href="/logout">Шығу</a>
-    <hr>
-    <h3>Студенттердің жұмыстары</h3>
-    <table border="1" cellpadding="10">
-        <tr><th>Студент</th><th>Тақырып</th><th>Файл</th><th>Баға қою</th></tr>
-        {% for task, user in tasks %}
-        <tr>
-            <td>{{ user.username }}</td>
-            <td>{{ task.title }}</td>
-            <td><a href="{{ task.file_url }}" target="_blank">Ашу</a></td>
-            <td>
-                <form action="/grade_task/{{ task.id }}" method="POST">
-                    <input type="text" name="grade" value="{{ task.grade if task.grade else '' }}" style="width: 50px;">
-                    <button type="submit">Сақтау</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { background: #090A0F; color: white; font-family: sans-serif; margin: 0; padding: 20px; }
+        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border-radius: 20px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); max-width: 900px; margin: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        input { background: rgba(255,255,255,0.1); border: none; color: white; padding: 5px; width: 40px; border-radius: 5px; }
+        button { background: #00ffcc; color: black; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="glass">
+        <div style="display: flex; justify-content: space-between;">
+            <h2>Тексеру панелі</h2>
+            <a href="/logout" style="color: #ff4d4d; text-decoration: none;">Шығу</a>
+        </div>
+        <table>
+            <tr><th>Студент</th><th>Тапсырма</th><th>Файл</th><th>Баға</th></tr>
+            {% for task, user in tasks %}
+            <tr>
+                <td>{{ user.username }}</td>
+                <td>{{ task.title }}</td>
+                <td><a href="{{ task.file_url }}" target="_blank" style="color: #00d2ff;">Ашу</a></td>
+                <td>
+                    <form action="/grade_task/{{ task.id }}" method="POST">
+                        <input type="text" name="grade" value="{{ task.grade if task.grade else '' }}">
+                        <button type="submit">OK</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
 </body>
 </html>
