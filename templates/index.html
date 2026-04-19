@@ -21,6 +21,28 @@
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { text-align: left; padding: 15px; border-bottom: 1px solid #eee; }
         .grade-badge { background: #eef2ff; color: var(--primary); padding: 5px 15px; border-radius: 8px; font-weight: 800; font-size: 1.2rem; }
+
+        /* --- ТЕЛЕФОНҒА АРНАЛҒАН ҚОСЫМША СТИЛЬДЕР (ДЫМ ӨЗГЕРТПЕЙ ҚОСЫЛДЫ) --- */
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .switcher { width: 100%; justify-content: center; }
+            .sw-btn { flex: 1; text-align: center; }
+            .card { padding: 20px; border-radius: 20px; }
+            
+            /* Мұғалім панеліндегі элементтерді астына қою */
+            div[style*="display: flex"] { 
+                flex-direction: column !important; 
+                gap: 10px !important; 
+            }
+            
+            input, button { width: 100%; height: 50px; }
+            
+            /* Кестені жылжымалы қылу (сыймай қалса) */
+            table { display: block; overflow-x: auto; white-space: nowrap; }
+            
+            h2 { font-size: 1.2rem; }
+            h3 { font-size: 1.1rem; }
+        }
     </style>
 </head>
 <body>
@@ -102,11 +124,9 @@
 
     // 4. СТУДЕНТ: МӘЛІМЕТТІ ЖАҢАРТУ (REAL-TIME)
     function refreshData() {
-        // Бағаны алу
         const grade = localStorage.getItem('live_grade') || 0;
         document.getElementById('studentGrade').innerText = grade;
 
-        // Тапсырмаларды алу
         const tasks = JSON.parse(localStorage.getItem('live_tasks')) || [];
         const tbody = document.getElementById('studentTasks');
         tbody.innerHTML = "";
@@ -115,14 +135,12 @@
         });
     }
 
-    // 5. БАСҚА ТЕРЕЗЕДЕГІ ӨЗГЕРІСТІ БІРДЕН СЕЗУ (STORAGE EVENT)
     window.addEventListener('storage', (event) => {
         if (event.key === 'live_grade' || event.key === 'live_tasks') {
             refreshData();
         }
     });
 
-    // Бастапқы жүктеу
     refreshData();
 </script>
 
