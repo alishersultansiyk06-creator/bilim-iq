@@ -7,13 +7,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
-            margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center;
+            margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
             background: radial-gradient(circle at bottom, #1B2735 0%, #090A0F 100%);
-            font-family: 'Segoe UI', sans-serif; color: white; overflow: hidden;
+            font-family: 'Segoe UI', sans-serif; color: white; overflow-x: hidden;
         }
         .glass-card {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 25px; padding: 40px;
             width: 90%; max-width: 350px; text-align: center;
@@ -23,7 +24,7 @@
         input {
             width: 100%; padding: 12px; margin: 10px 0; border-radius: 12px;
             border: 1px solid rgba(255,255,255,0.1); background: rgba(255, 255, 255, 0.1); 
-            color: white; outline: none; box-sizing: border-box;
+            color: white; outline: none; box-sizing: border-box; font-size: 16px; /* Телефонда масштабтауды болдырмау үшін */
         }
         input::placeholder { color: rgba(255,255,255,0.5); }
         
@@ -34,7 +35,6 @@
         }
         .btn-main:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(0,210,255,0.5); }
 
-        /* Әлеуметтік желілер блогы */
         .separator {
             margin: 25px 0; display: flex; align-items: center; text-align: center;
             color: rgba(255,255,255,0.3); font-size: 0.8rem;
@@ -56,6 +56,28 @@
         .google-color { color: #DB4437; }
         .fb-color { color: #4267B2; }
 
+        /* --- МОБИЛЬДІ БЕЙІМДЕУ --- */
+        @media (max-width: 480px) {
+            .glass-card {
+                padding: 30px 20px;
+                width: 95%;
+            }
+            h1 { font-size: 1.8rem; margin-bottom: 20px; }
+            
+            /* Телефонда әлеуметтік батырмалар астына түспеуі үшін кішірейту */
+            .btn-social {
+                font-size: 0.8rem;
+                padding: 12px 5px;
+            }
+            
+            input {
+                height: 50px; /* Саусаққа ыңғайлы биіктік */
+            }
+            
+            .btn-main {
+                height: 50px;
+            }
+        }
     </style>
 </head>
 <body>
