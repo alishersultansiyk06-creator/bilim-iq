@@ -13,13 +13,13 @@ if not os.path.exists(UPLOAD_FOLDER):
 # 2. МӘЛІМЕТТЕР (Осы жердегі аттар мен парольдер ғана жарамды)
 USERS = {
     'admin': {
-        'name': 'Биғалиева Венера', 
+        'name': '', 
         'password': '123', 
         'role': 'teacher', 
         'route': 'teacher_dashboard'
     },
     'student': {
-        'name': 'Сұлтансиық Әлішер', 
+        'name': '', 
         'password': '321', 
         'role': 'student', 
         'route': 'student_dashboard'
