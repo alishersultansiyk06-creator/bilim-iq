@@ -15,6 +15,7 @@
         body {
             margin: 0; padding: 20px; background: var(--bg);
             color: white; font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
         }
         .dashboard {
             display: grid;
@@ -26,6 +27,7 @@
         .tile {
             background: var(--glass);
             backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border-radius: 20px;
             padding: 20px;
             border: 1px solid var(--border);
@@ -33,7 +35,7 @@
             display: flex; flex-direction: column; justify-content: space-between;
             position: relative; overflow: hidden;
         }
-        .tile:hover { transform: translateY(-5px); border-color: var(--accent); }
+        .tile:hover { transform: translateY(-3px); border-color: var(--accent); }
         .tile i { font-size: 2rem; opacity: 0.2; position: absolute; right: 20px; top: 20px; }
         .tile h3 { margin: 0 0 10px 0; font-size: 1.1rem; color: #aaa; }
         .tile .content { font-size: 1.2rem; font-weight: bold; }
@@ -43,16 +45,19 @@
         .task-row {
             display: flex; justify-content: space-between; align-items: center;
             padding: 10px 0; border-bottom: 1px solid var(--border);
+            flex-wrap: wrap; gap: 10px;
         }
         .btn-mini {
-            background: var(--accent); border: none; padding: 5px 12px;
-            border-radius: 5px; cursor: pointer; font-weight: bold; color: #000;
+            background: var(--accent); border: none; padding: 8px 15px;
+            border-radius: 8px; cursor: pointer; font-weight: bold; color: #000;
+            transition: 0.2s;
         }
+        .btn-mini:active { transform: scale(0.95); }
 
         .post-input-file {
             width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 8px;
             border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white;
-            box-sizing: border-box; outline: none; cursor: pointer;
+            box-sizing: border-box; outline: none; cursor: pointer; font-size: 14px;
         }
         .post-input-file::file-selector-button {
             background: var(--accent); border: none; padding: 4px 10px;
@@ -61,20 +66,46 @@
         }
 
         .grade-input {
-            width: 50px; background: rgba(0,0,0,0.5); border: 1px solid var(--border);
-            color: white; text-align: center; border-radius: 4px; padding: 4px;
+            width: 60px; background: rgba(0,0,0,0.5); border: 1px solid var(--border);
+            color: white; text-align: center; border-radius: 6px; padding: 8px;
+            font-size: 16px;
         }
 
         .post-input, .post-textarea {
-            width: 100%; padding: 10px; margin-bottom: 8px; border-radius: 8px;
+            width: 100%; padding: 12px; margin-bottom: 8px; border-radius: 8px;
             border: 1px solid var(--border); background: rgba(0,0,0,0.3); color: white;
-            box-sizing: border-box; outline: none;
+            box-sizing: border-box; outline: none; font-size: 16px;
         }
-        .post-textarea { height: 60px; font-family: inherit; }
+        .post-textarea { height: 80px; font-family: inherit; resize: none; }
 
         header {
             max-width: 1200px; margin: 0 auto 30px;
             display: flex; justify-content: space-between; align-items: center;
+        }
+
+        /* --- МОБИЛЬДІ БЕЙІМДЕУ --- */
+        @media (max-width: 768px) {
+            body { padding: 15px; }
+            header { flex-direction: column; text-align: center; gap: 10px; }
+            .dashboard { grid-template-columns: 1fr; }
+            .wide { grid-column: span 1; }
+            
+            .tile { padding: 15px; min-height: 160px; }
+            
+            .task-row { flex-direction: column; align-items: flex-start; }
+            .task-row div[style*="align-items: center"] { 
+                width: 100%; 
+                justify-content: space-between; 
+                margin-top: 5px;
+            }
+
+            .btn-mini { width: 100%; text-align: center; padding: 12px; }
+            
+            form[style*="display: flex"] {
+                flex-direction: column !important;
+            }
+            
+            .grade-input { width: 80px; }
         }
     </style>
 </head>
@@ -95,8 +126,8 @@
         
         <form action="/post_task" method="POST" enctype="multipart/form-data">
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <input type="text" name="subject" class="post-input" style="flex: 1;" placeholder="Пән атауы" required>
-                <div style="flex: 1;">
+                <input type="text" name="subject" class="post-input" style="flex: 1; min-width: 200px;" placeholder="Пән атауы" required>
+                <div style="flex: 1; min-width: 200px;">
                     <input type="file" name="file" class="post-input-file" required>
                 </div>
             </div>
@@ -108,7 +139,7 @@
     <div class="tile wide" style="background: linear-gradient(45deg, rgba(0,210,255,0.1), transparent);">
         <i class="fa-solid fa-list-check"></i>
         <h3>Тексеру және бақылау</h3>
-        <div class="task-list" style="max-height: 250px; overflow-y: auto; padding-right: 10px;">
+        <div class="task-list" style="max-height: 300px; overflow-y: auto; padding-right: 10px;">
             {% for task, user in tasks %}
             <div class="task-row">
                 <div style="display: flex; flex-direction: column;">
@@ -116,20 +147,20 @@
                     <small style="opacity: 0.7;">{{ task.title }}</small>
                 </div>
                 
-                <div style="display: flex; align-items: center; gap: 15px;">
+                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                     <a href="{{ url_for('static', filename='uploads/' + task.file_url) }}" target="_blank" style="color:var(--accent); text-decoration: none; font-size: 0.9rem;">
-                        <i class="fa-solid fa-file-pdf"></i> Файлды көру
+                        <i class="fa-solid fa-file-pdf"></i> Көру
                     </a>
                     
-                    <form action="/grade_task/{{ task.id }}" method="POST" style="display: flex; gap: 5px;">
+                    <form action="/grade_task/{{ task.id }}" method="POST" style="display: flex; gap: 5px; align-items: center;">
                         <input type="text" name="grade" class="grade-input" value="{{ task.grade if task.grade else '' }}" placeholder="0">
-                        <button type="submit" class="btn-mini">OK</button>
+                        <button type="submit" class="btn-mini" style="width: auto;">OK</button>
                     </form>
                 </div>
             </div>
             {% endfor %}
             {% if not tasks %}
-            <p style="opacity: 0.5; font-size: 0.9rem; text-align: center; padding: 20px;">Әзірге жіберілген жұмыстар жоқ.</p>
+            <p style="opacity: 0.5; font-size: 0.9rem; text-align: center; padding: 20px;">Жұмыстар жоқ.</p>
             {% endif %}
         </div>
     </div>
@@ -137,22 +168,15 @@
     <div class="tile" style="background: rgba(52, 152, 219, 0.1);">
         <i class="fa-solid fa-calendar-days"></i>
         <h3>Сабақ кестесі</h3>
-        <div class="content">Келесі сабақ: 14:30<br><small>Аудитория: 402</small></div>
-        <button class="btn-mini">Ашу</button>
+        <div class="content">Келесі сабак: 14:30<br><small>Аудитория: 402</small></div>
+        <button class="btn-mini" style="margin-top: 10px;">Ашу</button>
     </div>
 
     <div class="tile">
         <i class="fa-solid fa-users"></i>
         <h3>Студенттер</h3>
         <div class="content">25 белсенді</div>
-        <button class="btn-mini">Тізім</button>
-    </div>
-
-    <div class="tile wide" style="background: rgba(46, 204, 113, 0.1);">
-        <i class="fa-solid fa-bullhorn"></i>
-        <h3>Хабарламалар</h3>
-        <p style="font-size: 0.9rem; margin: 5px 0;">• Конференцияға тіркелу басталды.<br>• Жаңа оқу бағдарламасы бекітілді.</p>
-        <button class="btn-mini">Толығырақ</button>
+        <button class="btn-mini" style="margin-top: 10px;">Тізім</button>
     </div>
 
     <div class="tile">
@@ -163,24 +187,10 @@
     </div>
 
     <div class="tile">
-        <i class="fa-solid fa-book"></i>
-        <h3>Кітапхана</h3>
-        <div class="content">12 жаңа материал</div>
-        <button class="btn-mini">Өту</button>
-    </div>
-
-    <div class="tile">
-        <i class="fa-solid fa-video"></i>
-        <h3>Курстар</h3>
-        <div class="content">4 жарияланды</div>
-        <button class="btn-mini">Басқару</button>
-    </div>
-
-    <div class="tile">
         <i class="fa-solid fa-envelope-open-text"></i>
         <h3>Сұраныстар</h3>
         <div class="content">2 жаңа хат</div>
-        <button class="btn-mini">Көру</button>
+        <button class="btn-mini" style="margin-top: 10px;">Көру</button>
     </div>
 </div>
 
